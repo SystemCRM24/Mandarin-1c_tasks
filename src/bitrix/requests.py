@@ -1,0 +1,69 @@
+"""Запросики к битриксу"""
+from dotenv import dotenv_values
+from fast_bitrix24 import BitrixAsync
+from pathlib import Path
+import aiocache
+
+
+ENV = dotenv_values(Path(__file__).parent.parent.parent / '.env')
+BX = BitrixAsync(ENV['BITRIX_WEBHOOK'], verbose=False)
+
+
+
+@aiocache.cached(ttl=60*60*24, namespace='department')
+async def get_department_id_from_name(name: str) -> str:
+    """Получает id подразделения по его имени. Если не нашло, то вернет id администрации"""
+    response = await BX.call('department.get', items={'NAME': name})
+    if isinstance(response, dict):
+        return response['ID']
+    return '1'
+
+
+@aiocache.cached(ttl=60*60*4, namespace='staff')
+async def get_staff_from_department_id(department_id: str) -> list:
+    """Получает персонал подразделения. Если ничего нет, то возвращает персонал админского подразделения"""
+    response = await BX.get_all('user.get', params={'UF_DEPARTMENT': department_id})
+    if not response:
+        admin_department_id = await get_department_id_from_name('admin')
+        return await get_staff_from_department_id(admin_department_id)
+    return response
+
+
+async def get_staff_tasks(staff: list):
+    """Получает задачи персонала по переданному списку"""
+    params = {'halt': 0, 'cmd': {}}
+     # Исключаем выполненные задачи
+    for i, s in enumerate(staff):
+        params['cmd'][i] = f'tasks.task.list?filter[!STATUS]=5&filter[RESPONSIBLE_ID]={s['ID']}'
+    response = await BX.call_batch(params=params)
+    return [x['tasks'] for x in response]
+
+
+async def create_task(request_data: dict):
+    """Создает таску в битриксе"""
+    await BX.call(method='tasks.task.add', items={'fields': request_data})
+
+
+async def update_task(task_id: int | str, request_data: dict):
+    """Обновляет задачу"""
+    await BX.call(method='tasks.task.update', items={'taskId': task_id, 'fields': request_data})
+
+
+async def upload_files():
+    """"""
+
+
+async def test():
+    result = await BX.call('timeman.schedule.get', items={'id': 1},)
+    print(result)
+
+
+async def another_test():
+    result = await BX.call('timeman.status', items={'user_id': 8})
+    print(result)
+
+
+
+if __name__ == '__main__':
+    import asyncio
+    asyncio.run(test())
