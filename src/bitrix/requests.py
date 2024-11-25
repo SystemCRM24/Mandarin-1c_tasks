@@ -41,7 +41,7 @@ async def get_staff_tasks(staff: list):
 
 async def create_task(request_data: dict):
     """Создает таску в битриксе"""
-    await BX.call(method='tasks.task.add', items={'fields': request_data})
+    result = await BX.call(method='tasks.task.add', items={'fields': request_data})
 
 
 async def update_task(task_id: int | str, request_data: dict):
@@ -49,21 +49,40 @@ async def update_task(task_id: int | str, request_data: dict):
     await BX.call(method='tasks.task.update', items={'taskId': task_id, 'fields': request_data})
 
 
-async def upload_files():
-    """"""
+async def upload_file(name: str, binary_str: str) -> dict:
+    """
+    Загружает файлы на диск в папку прикрепленные файлы
+    name: имя файла
+    binary_str: Строка в кодировке base64
+
+    return: Словарь с информацией о загруженном файле. 
+    https://apidocs.bitrix24.ru/api-reference/disk/folder/disk-folder-upload-file.html
+    """
+    result: dict = await BX.call(
+        method='disk.folder.uploadfile',
+        items={
+            'id': 78,                       # Папка: Прикрепленные файлы
+            'fileContent': [name, binary_str],
+            'data': {'NAME': name},
+            'generateUniqueName': True
+        },
+        raw=True
+    )
+    return result['result']
 
 
-async def test():
-    result = await BX.call('timeman.schedule.get', items={'id': 1},)
+@aiocache.cached(ttl=60*60*24, namespace='work_schedule')
+async def get_work_schedule(id: int | str = 1) -> dict:
+    """Получает настройки рабочего графика. По умолчанию - график под номером 1: для всех."""
+    result = await BX.call('timeman.schedule.get', items={'id': id}, raw=True)
+    return result['result']
+
+
+async def get_task():
+    result = await BX.call('tasks.task.get', items={'taskId': '158'})
     print(result)
-
-
-async def another_test():
-    result = await BX.call('timeman.status', items={'user_id': 8})
-    print(result)
-
-
 
 if __name__ == '__main__':
     import asyncio
-    asyncio.run(test())
+    # asyncio.run(create_task({'TITLE': 'test','RESPONSIBLE_ID': 1, 'TIME_ESTIMATE': 60 * 60, 'ALLOW_TIME_TRACKING': 'Y'}))
+    # asyncio.run(get_task())

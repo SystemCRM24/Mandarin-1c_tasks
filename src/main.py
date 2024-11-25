@@ -1,8 +1,17 @@
 from fastapi import FastAPI
+from fastapi.exceptions import HTTPException
 from schemas import OrderSchema
-from bitrix.task import Task
+from bitrix.task import Task, UpdateTaskException
 from bitrix.file import Files
 import asyncio
+
+# Для дебага
+import logging
+from datetime import datetime
+
+logger = logging.getLogger('debug_logger')
+logger.setLevel(logging.INFO)
+logger.handlers = [logging.FileHandler('log.log', encoding='utf-8')]
 
 
 app = FastAPI(
@@ -22,8 +31,17 @@ async def create_tasks(order: OrderSchema):
     """Создание задач"""
     files = Files(order.attached_files)
     tasks = (Task(order, td, files).put_task() for td in order.calculation)
-    await asyncio.gather(files.upload(), *tasks)
-    return {'message': 'success'}
+    try:
+        await asyncio.gather(files.upload(), *tasks)
+        return {'message': 'success'}
+    except Exception as e:
+        logger.info('-----' * 6)
+        logger.info(str(datetime.now()))
+        logger.info(str(order))
+        logger.error(e, stack_info=True)
+        if isinstance(e, UpdateTaskException):
+            return {'message': 'При обновлении задачи произошла ошибка. Скорее всего, некоторые данные в задаче были обновлены, но что-то пошло не так. Битрикс момент.'}
+        raise HTTPException(500, detail=str(e))
 
 
 # uvicorn main:app --host 0.0.0.0 --port 80

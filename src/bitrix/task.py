@@ -2,9 +2,15 @@ import schemas
 from . import requests
 from .file import Files
 
-from typing import Coroutine
-from datetime import datetime, date
+from datetime import datetime, date, timezone, timedelta
 import math
+
+
+MOSCOW_TIMEZONE = timezone(timedelta(hours=3), 'ETC')
+
+
+class UpdateTaskException(Exception):
+    """Исключение при обновлении задачи"""
 
 
 class Task:
@@ -25,7 +31,7 @@ class Task:
         # Переменные для запроса
         self.task_name: str = None
         self.victim: dict = None
-        self.victim_last_deadline: float = None
+        self.victim_last_deadline: datetime = None
 
     async def put_task(self):
         """Ставит задачу"""
@@ -41,7 +47,7 @@ class Task:
         """Различная подготовка объекта перед выполнением запросов"""
         # Формируем название заказа
         self.task_name = f'{self.calculation.position}: {self.order.number}'
-        # Переводим время в секунды. 
+        # Округляем время в потолок. Переводим в секунды
         self.calculation.time = math.ceil(self.calculation.time * 60)
     
     def _get_handler(self):
@@ -50,25 +56,28 @@ class Task:
             victim = self.staff[i]
             victim_tasks = self.staff_tasks[i]
             if not victim_tasks:
-                self.victim_last_deadline = datetime.now().timestamp()
+                self.victim_last_deadline = datetime.now(MOSCOW_TIMEZONE)
                 self.victim = victim 
                 break
             for task in victim_tasks:
                 if task['title'] == self.task_name:     # В случае обновления задачи
-                    self.victim_last_deadline = datetime.fromisoformat(task['createdDate']).timestamp()
+                    self.victim_last_deadline = datetime.fromisoformat(task['createdDate'])
                     self.victim = victim
                     return self._update_task_wrapper(task['id'])
-                current_deadline = datetime.fromisoformat(task['deadline']).timestamp()
+                current_deadline = datetime.fromisoformat(task['deadline'])
                 if self.victim_last_deadline is None or current_deadline < self.victim_last_deadline:
                     self.victim_last_deadline = current_deadline
                     self.victim = self.staff[i]
         return requests.create_task
 
     @staticmethod
-    def _update_task_wrapper(task_id):
+    def _update_task_wrapper(task_id: int | str):
         """Обертка для обновления задачи"""
-        async def wrapper(request_data):
-            await requests.update_task(task_id, request_data)
+        async def wrapper(request_data: dict):
+            try:
+                await requests.update_task(task_id, request_data)
+            except:
+                raise UpdateTaskException('Ошибка обновления задачи')
         return wrapper
 
     async def _get_request(self) -> dict:
@@ -77,10 +86,12 @@ class Task:
             'TITLE': self.task_name,
             'RESPONSIBLE_ID': self.victim['ID'],
             'DESCRIPTION': self._get_task_description(),
-            'DATE_START': date.fromtimestamp(self.victim_last_deadline),
-            'DEADLINE': await self._get_deadline_date(self.victim_last_deadline),
+            'DATE_START': self.victim_last_deadline,
+            'DEADLINE': await self._get_deadline_date(),
             'TIME_ESTIMATE': self.calculation.time,
-            'UF_TASK_WEBDAV_FILES': await self.files.get_request()
+            'UF_TASK_WEBDAV_FILES': await self.files.get_request(),
+            'MATCH_WORK_TIME': 'Y',
+            'ALLOW_TIME_TRACKING': 'Y'
         }
 
     def _get_task_description(self) -> str:
@@ -91,6 +102,25 @@ class Task:
         )
         return '\n'.join(string)
 
-    async def _get_deadline_date(self, base: float) -> date:
+    async def _get_deadline_date(self) -> date:
         """Возвращает deadline date. Подсчет ведется от переданной base"""
-        return date.fromtimestamp(base + self.calculation.time)
+        work_schedule: dict = await requests.get_work_schedule()
+        shifts = work_schedule['SHIFTS'][0]
+        work_time_start = timedelta(seconds=shifts['WORK_TIME_START'])
+        work_time_end = timedelta(seconds=shifts['WORK_TIME_END'])
+
+        deadline = self.victim_last_deadline
+        workday_duration = work_time_end - work_time_start
+        task_duration = timedelta(seconds=self.calculation.time)
+        while task_duration > workday_duration:
+            deadline += timedelta(days=1)
+            task_duration -= workday_duration
+        deadline += task_duration
+        # Проверка того, чтобы остаток не попал на время после окончания рабочего дня
+        remains = timedelta(hours=deadline.hour, minutes=deadline.minute, seconds=deadline.second)
+        print(self.task_name, deadline, remains, work_time_end, end=' ')
+        if remains > work_time_end:
+            deadline += timedelta(days=1) - workday_duration
+            print('-> ', deadline, end=' ')
+        print('')
+        return deadline
