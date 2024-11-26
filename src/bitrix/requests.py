@@ -34,7 +34,7 @@ async def get_staff_tasks(staff: list):
     params = {'halt': 0, 'cmd': {}}
      # Исключаем выполненные задачи
     for i, s in enumerate(staff):
-        params['cmd'][i] = f'tasks.task.list?filter[!STATUS]=5&filter[RESPONSIBLE_ID]={s['ID']}'
+        params['cmd'][i] = f'tasks.task.list?filter[!STATUS]=5&filter[RESPONSIBLE_ID]={s["ID"]}'
     response = await BX.call_batch(params=params)
     return [x['tasks'] for x in response]
 
