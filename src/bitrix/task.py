@@ -108,7 +108,6 @@ class Task:
         shifts = work_schedule['SHIFTS'][0]
         work_time_start = timedelta(seconds=shifts['WORK_TIME_START'])
         work_time_end = timedelta(seconds=shifts['WORK_TIME_END'])
-
         deadline = self.victim_last_deadline
         workday_duration = work_time_end - work_time_start
         task_duration = timedelta(seconds=self.calculation.time)
@@ -118,9 +117,6 @@ class Task:
         deadline += task_duration
         # Проверка того, чтобы остаток не попал на время после окончания рабочего дня
         remains = timedelta(hours=deadline.hour, minutes=deadline.minute, seconds=deadline.second)
-        print(self.task_name, deadline, remains, work_time_end, end=' ')
         if remains > work_time_end:
             deadline += timedelta(days=1) - workday_duration
-            print('-> ', deadline, end=' ')
-        print('')
         return deadline

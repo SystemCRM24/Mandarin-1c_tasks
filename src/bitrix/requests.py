@@ -41,7 +41,7 @@ async def get_staff_tasks(staff: list):
 
 async def create_task(request_data: dict):
     """Создает таску в битриксе"""
-    result = await BX.call(method='tasks.task.add', items={'fields': request_data})
+    await BX.call(method='tasks.task.add', items={'fields': request_data})
 
 
 async def update_task(task_id: int | str, request_data: dict):

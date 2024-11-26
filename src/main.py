@@ -33,14 +33,14 @@ async def create_tasks(order: OrderSchema):
     tasks = (Task(order, td, files).put_task() for td in order.calculation)
     try:
         await asyncio.gather(files.upload(), *tasks)
-        return {'message': 'success'}
+        return {'message': 'ok'}
     except Exception as e:
         logger.info('-----' * 6)
         logger.info(str(datetime.now()))
         logger.info(str(order))
         logger.error(e, stack_info=True)
         if isinstance(e, UpdateTaskException):
-            return {'message': 'При обновлении задачи произошла ошибка. Скорее всего, некоторые данные в задаче были обновлены, но что-то пошло не так. Битрикс момент.'}
+            return {'message': 'При обновлении задачи произошла ошибка. Скорее всего, некоторые данные в задаче были обновлены, но что-то пошло не так.'}
         raise HTTPException(500, detail=str(e))
 
 
