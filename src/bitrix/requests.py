@@ -10,13 +10,29 @@ BX = BitrixAsync(ENV['BITRIX_WEBHOOK'], verbose=False)
 
 
 
-@aiocache.cached(ttl=60*60*24, namespace='department')
+
 async def get_department_id_from_name(name: str) -> str:
     """Получает id подразделения по его имени. Если не нашло, то вернет id администрации"""
-    response = await BX.call('department.get', items={'NAME': name})
-    if isinstance(response, dict):
-        return response['ID']
+    departments = await get_department_info()
+    for department in departments:
+        if department['NAME'] == name:
+            return department['ID']
     return '1'
+
+
+async def get_department_head_from_name(name: str) -> str:
+    """Получает ID руководителя подразделения"""
+    departments = await get_department_info()
+    for department in departments:
+        if department['NAME'] == name:
+            return department['UF_HEAD']
+    return '1'
+
+
+@aiocache.cached(ttl=60*60*24, namespace='department')
+async def get_department_info() -> list:
+    """Возвращает информацию """
+    return await BX.get_all('department.get')
 
 
 @aiocache.cached(ttl=60*60*4, namespace='staff')
@@ -79,10 +95,11 @@ async def get_work_schedule(id: int | str = 1) -> dict:
 
 
 async def get_task():
-    result = await BX.call('tasks.task.get', items={'taskId': '158'})
-    print(result)
+    result = await BX.call('timeman.schedule.get', items={'id': 4}, raw=True)
+    print(result['result'])
+
 
 if __name__ == '__main__':
     import asyncio
     # asyncio.run(create_task({'TITLE': 'test','RESPONSIBLE_ID': 1, 'TIME_ESTIMATE': 60 * 60, 'ALLOW_TIME_TRACKING': 'Y'}))
-    # asyncio.run(get_task())
+    asyncio.run(get_task())

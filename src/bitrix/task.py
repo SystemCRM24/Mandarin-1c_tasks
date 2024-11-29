@@ -1,9 +1,11 @@
 import schemas
 from . import requests
 from .file import Files
+from .bx_calendar import Calendar
 
-from datetime import datetime, date, timezone, timedelta
+from datetime import datetime, timezone, timedelta, UTC
 import math
+import asyncio
 
 
 MOSCOW_TIMEZONE = timezone(timedelta(hours=3), 'ETC')
@@ -28,20 +30,24 @@ class Task:
         # Технические переменные
         self.staff: list = None
         self.staff_tasks: list = None
+        self.staff_calendar = Calendar(calculation.position)
         # Переменные для запроса
         self.task_name: str = None
+        self.rapist_id: int = 1
         self.victim: dict = None
         self.victim_last_deadline: datetime = None
 
     async def put_task(self):
         """Ставит задачу"""
         self._preprocessing()
-        department_id = await requests.get_department_id_from_name(self.calculation.position)
-        self.staff = await requests.get_staff_from_department_id(department_id)
-        self.staff_tasks = await requests.get_staff_tasks(self.staff)
-        handler = self._get_handler()
-        request_data = await self._get_request()
-        await handler(request_data)
+        await asyncio.gather(
+            self.files.atask,
+            self.staff_calendar.update(),
+            self._update_staff_info(), 
+            self._select_rapist(),
+        )
+        handler = self._select_victim()
+        await handler(self._get_request())
     
     def _preprocessing(self):
         """Различная подготовка объекта перед выполнением запросов"""
@@ -50,13 +56,28 @@ class Task:
         # Округляем время в потолок. Переводим в секунды
         self.calculation.time = math.ceil(self.calculation.time * 60)
     
-    def _get_handler(self):
-        """Возвращает обработчик, который будет ставить или обновлять задачи."""
+    async def _update_staff_info(self):
+        """Обновляет информацию по подразделению и сотрудникам"""
+        department_id = await requests.get_department_id_from_name(self.calculation.position)
+        self.staff = await requests.get_staff_from_department_id(department_id)
+        self.staff_tasks = await requests.get_staff_tasks(self.staff)
+    
+    async def _select_rapist(self):
+        """Устанавливает постановщика задачи"""
+        self.rapist_id = await requests.get_department_head_from_name(self.order.executor)
+
+    def _select_victim(self):
+        """
+        Определяет человека, которому будет поставлена задача 
+        и время последней задачи, по которой будет производиться подсчет
+        Возвращает обработчик, который будет ставить новую или обновлять старую задачу.
+        Все в куче в одной функции, но зато одним циклом.
+        """
         for i in range(len(self.staff)):
             victim = self.staff[i]
             victim_tasks = self.staff_tasks[i]
             if not victim_tasks:
-                self.victim_last_deadline = datetime.now(MOSCOW_TIMEZONE)
+                self.victim_last_deadline = datetime.now(UTC)
                 self.victim = victim 
                 break
             for task in victim_tasks:
@@ -80,17 +101,19 @@ class Task:
                 raise UpdateTaskException('Ошибка обновления задачи')
         return wrapper
 
-    async def _get_request(self) -> dict:
+    def _get_request(self) -> dict:
         """Формирует ответ для постановки или обновления задачи. Записываем под формат битрикса"""
         return {
             'TITLE': self.task_name,
+            'CREATED_BY': self.rapist_id,
             'RESPONSIBLE_ID': self.victim['ID'],
             'DESCRIPTION': self._get_task_description(),
             'DATE_START': self.victim_last_deadline,
-            'DEADLINE': await self._get_deadline_date(),
+            'DEADLINE': self._get_deadline_date(),
+            'START_DATE_PLAN': self.order.acceptance_date,
+            'END_DATE_PLAN': self.order.completion_date,
             'TIME_ESTIMATE': self.calculation.time,
-            'UF_TASK_WEBDAV_FILES': await self.files.get_request(),
-            'MATCH_WORK_TIME': 'Y',
+            'UF_TASK_WEBDAV_FILES': self.files.request,
             'ALLOW_TIME_TRACKING': 'Y'
         }
 
@@ -102,27 +125,27 @@ class Task:
         )
         return '\n'.join(string)
 
-    async def _get_deadline_date(self) -> date:
-        """Возвращает deadline date. Подсчет ведется от переданной base"""
-        work_schedule: dict = await requests.get_work_schedule()
-        try:
-            shifts = work_schedule['SHIFTS'][0]
-            work_time_start = shifts['WORK_TIME_START']
-            work_time_end = shifts['WORK_TIME_END']
-        except:
-            work_time_start = 32400
-            work_time_end = 64800
-        work_time_start = timedelta(seconds=work_time_start)
-        work_time_end = timedelta(seconds=work_time_end)
-        deadline = self.victim_last_deadline
-        workday_duration = work_time_end - work_time_start
+    def _get_deadline_date(self) -> datetime:
+        """
+        Возвращает deadline datetime
+        При отправке битриксу даты нужно явно указывать часовой пояс даты. 
+        Иначе битрикс будет ее интерпретировать по своему. Не смотря на то, что сам битрикс отдает дату в utc.
+        В случае заказчика, это было важно, так как учитывалось рабочее время сотрудника.
+        """
+        deadline = self.victim_last_deadline.replace(tzinfo=MOSCOW_TIMEZONE)
         task_duration = timedelta(seconds=self.calculation.time)
-        while task_duration > workday_duration:
+        # Прибавляем дни по рабочим часам
+        while task_duration > self.staff_calendar.work_day_duration:
             deadline += timedelta(days=1)
-            task_duration -= workday_duration
-        deadline += task_duration
+            task_duration -= self.staff_calendar.work_day_duration
+            while not self.staff_calendar.is_working_day(deadline):
+                deadline += timedelta(days=1)
         # Проверка того, чтобы остаток не попал на время после окончания рабочего дня
+        deadline += task_duration
         remains = timedelta(hours=deadline.hour, minutes=deadline.minute, seconds=deadline.second)
-        if remains > work_time_end:
-            deadline += timedelta(days=1) - workday_duration
+        if remains > self.staff_calendar.work_time_end:
+            deadline += timedelta(days=1) - self.staff_calendar.work_day_duration
+        # Проверка на выходные, праздники и тп.
+        while not self.staff_calendar.is_working_day(deadline):
+            deadline += timedelta(days=1)
         return deadline

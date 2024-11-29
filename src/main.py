@@ -32,7 +32,7 @@ async def create_tasks(order: OrderSchema):
     files = Files(order.attached_files)
     tasks = (Task(order, td, files).put_task() for td in order.calculation)
     try:
-        await asyncio.gather(files.upload(), *tasks)
+        await asyncio.gather(*tasks)
         return {'message': 'ok'}
     except Exception as e:
         logger.info('-----' * 6)
