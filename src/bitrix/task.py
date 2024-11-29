@@ -3,12 +3,13 @@ from . import requests
 from .file import Files
 from .bx_calendar import Calendar
 
-from datetime import datetime, timezone, timedelta, UTC
+from datetime import datetime, timezone, timedelta
 import math
 import asyncio
 
 
 MOSCOW_TIMEZONE = timezone(timedelta(hours=3), 'ETC')
+UTC = timezone(timedelta(hours=0), 'UTC')
 
 
 class UpdateTaskException(Exception):
