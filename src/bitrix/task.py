@@ -9,7 +9,6 @@ import asyncio
 
 
 MOSCOW_TIMEZONE = timezone(timedelta(hours=3), 'ETC')
-UTC = timezone(timedelta(hours=0), 'UTC')
 
 
 class UpdateTaskException(Exception):
@@ -78,7 +77,7 @@ class Task:
             victim = self.staff[i]
             victim_tasks = self.staff_tasks[i]
             if not victim_tasks:
-                self.victim_last_deadline = datetime.now(UTC)
+                self.victim_last_deadline = datetime.utcnow()
                 self.victim = victim 
                 break
             for task in victim_tasks:
