@@ -8,7 +8,8 @@ import math
 import asyncio
 
 
-MOSCOW_TIMEZONE = timezone(timedelta(hours=3), 'ETC')
+CORRECTION = timedelta(hours=3) # на москву
+MOSCOW_TIME_ZONE = timezone(CORRECTION, 'ETC')
 
 
 class UpdateTaskException(Exception):
@@ -77,7 +78,7 @@ class Task:
             victim = self.staff[i]
             victim_tasks = self.staff_tasks[i]
             if not victim_tasks:
-                self.victim_last_deadline = datetime.utcnow()
+                self.victim_last_deadline = datetime.now(MOSCOW_TIME_ZONE)
                 self.victim = victim 
                 break
             for task in victim_tasks:
@@ -132,7 +133,7 @@ class Task:
         Иначе битрикс будет ее интерпретировать по своему. Не смотря на то, что сам битрикс отдает дату в utc.
         В случае заказчика, это было важно, так как учитывалось рабочее время сотрудника.
         """
-        deadline = self.victim_last_deadline.replace(tzinfo=MOSCOW_TIMEZONE)
+        deadline = self.victim_last_deadline
         task_duration = timedelta(seconds=self.calculation.time)
         # Прибавляем дни по рабочим часам
         while task_duration > self.staff_calendar.work_day_duration:
@@ -141,11 +142,11 @@ class Task:
             while not self.staff_calendar.is_working_day(deadline):
                 deadline += timedelta(days=1)
         # Проверка того, чтобы остаток не попал на время после окончания рабочего дня
-        deadline += task_duration
+        deadline += task_duration + CORRECTION
         remains = timedelta(hours=deadline.hour, minutes=deadline.minute, seconds=deadline.second)
         if remains > self.staff_calendar.work_time_end:
             deadline += timedelta(days=1) - self.staff_calendar.work_day_duration
         # Проверка на выходные, праздники и тп.
         while not self.staff_calendar.is_working_day(deadline):
             deadline += timedelta(days=1)
-        return deadline
+        return deadline.replace(tzinfo=MOSCOW_TIME_ZONE)
