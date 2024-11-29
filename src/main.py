@@ -38,7 +38,7 @@ async def create_tasks(order: OrderSchema):
         logger.info('-----' * 6)
         logger.info(str(datetime.now()))
         logger.info(str(order))
-        logger.error(e, stack_info=True)
+        logger.error(e, exc_info=True)
         if isinstance(e, UpdateTaskException):
             return {'message': 'При обновлении задачи произошла ошибка. Скорее всего, некоторые данные в задаче были обновлены, но что-то пошло не так.'}
         raise HTTPException(500, detail=str(e))

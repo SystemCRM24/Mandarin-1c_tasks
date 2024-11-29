@@ -105,9 +105,15 @@ class Task:
     async def _get_deadline_date(self) -> date:
         """Возвращает deadline date. Подсчет ведется от переданной base"""
         work_schedule: dict = await requests.get_work_schedule()
-        shifts = work_schedule['SHIFTS'][0]
-        work_time_start = timedelta(seconds=shifts['WORK_TIME_START'])
-        work_time_end = timedelta(seconds=shifts['WORK_TIME_END'])
+        try:
+            shifts = work_schedule['SHIFTS'][0]
+            work_time_start = shifts['WORK_TIME_START']
+            work_time_end = shifts['WORK_TIME_END']
+        except:
+            work_time_start = 32400
+            work_time_end = 64800
+        work_time_start = timedelta(seconds=work_time_start)
+        work_time_end = timedelta(seconds=work_time_end)
         deadline = self.victim_last_deadline
         workday_duration = work_time_end - work_time_start
         task_duration = timedelta(seconds=self.calculation.time)
