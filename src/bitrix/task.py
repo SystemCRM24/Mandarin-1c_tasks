@@ -134,7 +134,7 @@ class Task:
         Иначе битрикс будет ее интерпретировать по своему. Не смотря на то, что сам битрикс отдает дату в utc.
         В случае заказчика, это было важно, так как учитывалось рабочее время сотрудника.
         """
-        deadline = self.victim_last_deadline.replace(tzinfo=MOSCOW_TIME_ZONE).astimezone()
+        deadline = self.victim_last_deadline.replace(tzinfo=MOSCOW_TIME_ZONE) + CORRECTION
         task_duration = timedelta(seconds=self.calculation.time)
         # Прибавляем дни по рабочим часам
         while task_duration > self.staff_calendar.work_day_duration:
@@ -143,7 +143,7 @@ class Task:
             while not self.staff_calendar.is_working_day(deadline):
                 deadline += timedelta(days=1)
         # Проверка того, чтобы остаток не попал на время после окончания рабочего дня
-        deadline += task_duration + CORRECTION
+        deadline += task_duration
         remains = timedelta(hours=deadline.hour, minutes=deadline.minute, seconds=deadline.second)
         if remains > self.staff_calendar.work_time_end:
             deadline += timedelta(days=1) - self.staff_calendar.work_day_duration
