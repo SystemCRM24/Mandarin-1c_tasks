@@ -8,8 +8,9 @@ import math
 import asyncio
 
 
-CORRECTION = timedelta(hours=3) # на москву
+CORRECTION = timedelta(hours=3)
 MOSCOW_TIME_ZONE = timezone(CORRECTION, 'ETC')
+UTC = timezone(timedelta(hours=0), 'utc')
 
 
 class UpdateTaskException(Exception):
@@ -78,7 +79,7 @@ class Task:
             victim = self.staff[i]
             victim_tasks = self.staff_tasks[i]
             if not victim_tasks:
-                self.victim_last_deadline = datetime.now(MOSCOW_TIME_ZONE)
+                self.victim_last_deadline = datetime.now(UTC)
                 self.victim = victim 
                 break
             for task in victim_tasks:
@@ -133,7 +134,7 @@ class Task:
         Иначе битрикс будет ее интерпретировать по своему. Не смотря на то, что сам битрикс отдает дату в utc.
         В случае заказчика, это было важно, так как учитывалось рабочее время сотрудника.
         """
-        deadline = self.victim_last_deadline
+        deadline = self.victim_last_deadline.replace(tzinfo=MOSCOW_TIME_ZONE).astimezone()
         task_duration = timedelta(seconds=self.calculation.time)
         # Прибавляем дни по рабочим часам
         while task_duration > self.staff_calendar.work_day_duration:
