@@ -107,6 +107,7 @@ class Task:
         """Формирует ответ для постановки или обновления задачи. Записываем под формат битрикса"""
         return {
             'TITLE': self.task_name,
+            'GROUP_ID': 1,  # задачи из 1с
             'CREATED_BY': self.rapist_id,
             'RESPONSIBLE_ID': self.victim['ID'],
             'DESCRIPTION': self._get_task_description(),

@@ -99,7 +99,16 @@ async def get_task():
     print(result['result'])
 
 
+async def main():
+    import base64
+    with open('src/bitrix/test_cat.jpg', 'rb') as binary_file:
+        binary_file_data = binary_file.read()
+    base64_encoded_data = base64.b64encode(binary_file_data)
+    base64_message = base64_encoded_data.decode('utf-8')
+    await upload_file('cat.jpg', base64_message)
+
+
 if __name__ == '__main__':
     import asyncio
     # asyncio.run(create_task({'TITLE': 'test','RESPONSIBLE_ID': 1, 'TIME_ESTIMATE': 60 * 60, 'ALLOW_TIME_TRACKING': 'Y'}))
-    asyncio.run(get_task())
+    asyncio.run(main())
