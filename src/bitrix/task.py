@@ -84,7 +84,7 @@ class Task:
                 break
             for task in victim_tasks:
                 if task['title'] == self.task_name:     # В случае обновления задачи
-                    self.victim_last_deadline = datetime.fromisoformat(task['createdDate'])
+                    self.victim_last_deadline = datetime.fromisoformat(task['dateStart'])
                     self.victim = victim
                     return self._update_task_wrapper(task['id'])
                 current_deadline = datetime.fromisoformat(task['deadline'])
