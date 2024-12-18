@@ -105,6 +105,7 @@ class Task:
 
     def _get_request(self) -> dict:
         """Формирует ответ для постановки или обновления задачи. Записываем под формат битрикса"""
+        deadline = self._get_deadline_date(),
         return {
             'TITLE': self.task_name,
             'GROUP_ID': 1,  # задачи из 1с
@@ -112,9 +113,9 @@ class Task:
             'RESPONSIBLE_ID': self.victim['ID'],
             'DESCRIPTION': self._get_task_description(),
             'DATE_START': self.victim_last_deadline,
-            'DEADLINE': self._get_deadline_date(),
-            'START_DATE_PLAN': self.order.acceptance_date,
-            'END_DATE_PLAN': self.order.completion_date,
+            'DEADLINE': deadline,
+            'START_DATE_PLAN': self.victim_last_deadline,
+            'END_DATE_PLAN': deadline,
             'TIME_ESTIMATE': self.calculation.time,
             'UF_TASK_WEBDAV_FILES': self.files.request,
             'ALLOW_TIME_TRACKING': 'Y'
