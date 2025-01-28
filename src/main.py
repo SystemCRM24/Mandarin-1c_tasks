@@ -47,8 +47,15 @@ async def create_tasks(order: OrderSchema):
 
 @app.get('/worktime/', status_code=200)
 async def get_work_time_periods(start: str, end: str):
-    """Отдает массив рабочих промежутков"""
-    print(start, end)
+    """Отдает массив рабочих дней"""
+    # [
+    #    {
+    #       "start": "2025-01-06T09:00:00+03:00",
+    #        "end": "2025-01-06T18:00:00+03:00"
+    #    },
+    # ...
+    # ]
+
     return [{'start': start, 'end': end}]
 
 
