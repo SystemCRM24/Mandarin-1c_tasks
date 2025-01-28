@@ -5,7 +5,7 @@ from pathlib import Path
 import aiocache
 
 
-ENV = dotenv_values(Path(__file__).parent.parent.parent / '.env')
+ENV = dotenv_values(Path(__file__).parent.parent / '.env')
 BX = BitrixAsync(ENV['BITRIX_WEBHOOK'], verbose=False)
 
 
