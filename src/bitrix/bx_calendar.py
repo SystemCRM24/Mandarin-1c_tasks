@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from . import requests
+from src.bitrix.requests import get_work_schedule
 
 # Момент, который пришлось жестко прописать
 # Если изменятся графики для подразделений, то их стоит прописать тут.
@@ -22,7 +22,7 @@ class Calendar:
     async def update(self):
         """Обновляет календарь, наделяет его информацией о праздниках, выходных днях и т.п."""
         schedule_id = SCHEDULE.get(self.position, "1")
-        schedule: dict = await requests.get_work_schedule(schedule_id)
+        schedule: dict = await get_work_schedule(schedule_id)
         # Дополнительные выходные
         current_calendar = schedule.get("EXCLUSIONS", {})
         exclusions = current_calendar.get("EXCLUSIONS", {})

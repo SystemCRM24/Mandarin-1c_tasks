@@ -1,7 +1,7 @@
 from asyncio import gather, create_task
 
-from .requests import upload_file
-from ..schemas import AttachedFilesItem
+from src.bitrix.requests import upload_file
+from src.schemas import AttachedFilesItem
 
 
 class Files:

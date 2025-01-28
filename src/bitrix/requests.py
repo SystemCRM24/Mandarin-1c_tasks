@@ -1,12 +1,10 @@
 """Запросики к битриксу"""
-from dotenv import dotenv_values
-from fast_bitrix24 import BitrixAsync
-from pathlib import Path
 import aiocache
+from fast_bitrix24 import BitrixAsync
 
+from src.config import BITRIX_WEBHOOK
 
-ENV = dotenv_values(Path(__file__).parent.parent / ".env")
-BX = BitrixAsync(ENV["BITRIX_WEBHOOK"], verbose=False)
+BX = BitrixAsync(BITRIX_WEBHOOK)
 
 
 async def get_department_id_from_name(name: str) -> str:
