@@ -45,4 +45,12 @@ async def create_tasks(order: OrderSchema):
         raise HTTPException(500, detail=str(e))
 
 
+@app.get('/worktime/', status_code=200)
+async def get_work_time_periods(start: str, end: str):
+    """Отдает массив рабочих промежутков"""
+    print(start, end)
+    return [{'start': start, 'end': end}]
+
+
+
 # uvicorn main:app --host 0.0.0.0 --port 80
