@@ -1,6 +1,7 @@
 from asyncio import gather, create_task
+
 from .requests import upload_file
-from schemas import AttachedFilesItem
+from ..schemas import AttachedFilesItem
 
 
 class Files:
@@ -18,4 +19,4 @@ class Files:
         tasks = (upload_file(item.name, item.binary) for item in self.files_to_upload)
         response = await gather(*tasks)
         for file in response:
-            self.request.append('n' + str(file['ID']))
+            self.request.append("n" + str(file["ID"]))

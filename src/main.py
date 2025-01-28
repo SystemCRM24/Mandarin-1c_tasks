@@ -10,21 +10,21 @@ import logging
 from datetime import datetime
 
 
-logger = logging.getLogger('debug_logger')
+logger = logging.getLogger("debug_logger")
 logger.setLevel(logging.INFO)
-logger.handlers = [logging.FileHandler('log.log', encoding='utf-8')]
+logger.handlers = [logging.FileHandler("log.log", encoding="utf-8")]
 
 
 app = FastAPI(
-    title='Постановка задач',
-    description='Автоматическая постановка задач для Битрикс24 компании Мандарин на основе POST-запроса.'
+    title="Постановка задач",
+    description="Автоматическая постановка задач для Битрикс24 компании Мандарин на основе POST-запроса.",
 )
 
 
 @app.get("/ping/", status_code=200)
 async def ping():
     """Пингует сервер"""
-    return {'message': 'Pong'}
+    return {"message": "Pong"}
 
 
 @app.post("/", status_code=200)
@@ -34,18 +34,21 @@ async def create_tasks(order: OrderSchema):
     tasks = (Task(order, td, files).put_task() for td in order.calculation)
     try:
         await asyncio.gather(*tasks)
-        return {'message': 'ok'}
+        return {"message": "ok"}
     except Exception as e:
-        logger.info('-----' * 6)
+        logger.info("-----" * 6)
         logger.info(str(datetime.now()))
         logger.info(str(order))
         logger.error(e, exc_info=True)
         if isinstance(e, UpdateTaskException):
-            return {'message': 'При обновлении задачи произошла ошибка. Скорее всего, некоторые данные в задаче были обновлены, но что-то пошло не так.'}
+            return {
+                "message": "При обновлении задачи произошла ошибка. Скорее всего, "
+                           "некоторые данные в задаче были обновлены, но что-то пошло не так."
+            }
         raise HTTPException(500, detail=str(e))
 
 
-@app.get('/worktime/', status_code=200)
+@app.get("/worktime/", status_code=200)
 async def get_work_time_periods(start: str, end: str):
     """Отдает массив рабочих дней"""
     # [
@@ -56,8 +59,7 @@ async def get_work_time_periods(start: str, end: str):
     # ...
     # ]
 
-    return [{'start': start, 'end': end}]
-
+    return [{"start": start, "end": end}]
 
 
 # uvicorn main:app --host 0.0.0.0 --port 80

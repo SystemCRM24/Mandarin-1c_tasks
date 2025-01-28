@@ -5,64 +5,62 @@ from pathlib import Path
 import aiocache
 
 
-ENV = dotenv_values(Path(__file__).parent.parent / '.env')
-BX = BitrixAsync(ENV['BITRIX_WEBHOOK'], verbose=False)
-
-
+ENV = dotenv_values(Path(__file__).parent.parent / ".env")
+BX = BitrixAsync(ENV["BITRIX_WEBHOOK"], verbose=False)
 
 
 async def get_department_id_from_name(name: str) -> str:
     """Получает id подразделения по его имени. Если не нашло, то вернет id администрации"""
     departments = await get_department_info()
     for department in departments:
-        if department['NAME'] == name:
-            return department['ID']
-    return '1'
+        if department["NAME"] == name:
+            return department["ID"]
+    return "1"
 
 
 async def get_department_head_from_name(name: str) -> str:
     """Получает ID руководителя подразделения"""
     departments = await get_department_info()
     for department in departments:
-        if department['NAME'] == name:
-            return department['UF_HEAD']
-    return '1'
+        if department["NAME"] == name:
+            return department["UF_HEAD"]
+    return "1"
 
 
-@aiocache.cached(ttl=60*60*24, namespace='department')
+@aiocache.cached(ttl=60 * 60 * 24, namespace="department")
 async def get_department_info() -> list:
-    """Возвращает информацию """
-    return await BX.get_all('department.get')
+    """Возвращает информацию"""
+    return await BX.get_all("department.get")
 
 
-@aiocache.cached(ttl=60*60*4, namespace='staff')
+@aiocache.cached(ttl=60 * 60 * 4, namespace="staff")
 async def get_staff_from_department_id(department_id: str) -> list:
     """Получает персонал подразделения. Если ничего нет, то возвращает персонал админского подразделения"""
-    response = await BX.get_all('user.get', params={'UF_DEPARTMENT': department_id})
+    response = await BX.get_all("user.get", params={"UF_DEPARTMENT": department_id})
     if not response:
-        admin_department_id = await get_department_id_from_name('admin')
+        admin_department_id = await get_department_id_from_name("admin")
         return await get_staff_from_department_id(admin_department_id)
     return response
 
 
 async def get_staff_tasks(staff: list):
     """Получает задачи персонала по переданному списку"""
-    params = {'halt': 0, 'cmd': {}}
-     # Исключаем выполненные задачи
+    params = {"halt": 0, "cmd": {}}
+    # Исключаем выполненные задачи
     for i, s in enumerate(staff):
-        params['cmd'][i] = f'tasks.task.list?filter[!STATUS]=5&filter[RESPONSIBLE_ID]={s["ID"]}'
+        params["cmd"][i] = f'tasks.task.list?filter[!STATUS]=5&filter[RESPONSIBLE_ID]={s["ID"]}'
     response = await BX.call_batch(params=params)
-    return [x['tasks'] for x in response]
+    return [x["tasks"] for x in response]
 
 
 async def create_task(request_data: dict):
     """Создает таску в битриксе"""
-    await BX.call(method='tasks.task.add', items={'fields': request_data})
+    await BX.call(method="tasks.task.add", items={"fields": request_data})
 
 
 async def update_task(task_id: int | str, request_data: dict):
     """Обновляет задачу"""
-    await BX.call(method='tasks.task.update', items={'taskId': task_id, 'fields': request_data})
+    await BX.call(method="tasks.task.update", items={"taskId": task_id, "fields": request_data})
 
 
 async def upload_file(name: str, binary_str: str) -> dict:
@@ -71,44 +69,46 @@ async def upload_file(name: str, binary_str: str) -> dict:
     name: имя файла
     binary_str: Строка в кодировке base64
 
-    return: Словарь с информацией о загруженном файле. 
+    return: Словарь с информацией о загруженном файле.
     https://apidocs.bitrix24.ru/api-reference/disk/folder/disk-folder-upload-file.html
     """
     result: dict = await BX.call(
-        method='disk.folder.uploadfile',
+        method="disk.folder.uploadfile",
         items={
-            'id': 78,                       # Папка: Прикрепленные файлы
-            'fileContent': [name, binary_str],
-            'data': {'NAME': name},
-            'generateUniqueName': True
+            "id": 78,  # Папка: Прикрепленные файлы
+            "fileContent": [name, binary_str],
+            "data": {"NAME": name},
+            "generateUniqueName": True,
         },
-        raw=True
+        raw=True,
     )
-    return result['result']
+    return result["result"]
 
 
-@aiocache.cached(ttl=60*60*24, namespace='work_schedule')
+@aiocache.cached(ttl=60 * 60 * 24, namespace="work_schedule")
 async def get_work_schedule(id: int | str = 1) -> dict:
     """Получает настройки рабочего графика. По умолчанию - график под номером 1: для всех."""
-    result = await BX.call('timeman.schedule.get', items={'id': id}, raw=True)
-    return result['result']
+    result = await BX.call("timeman.schedule.get", items={"id": id}, raw=True)
+    return result["result"]
 
 
 async def get_task():
-    result = await BX.call('timeman.schedule.get', items={'id': 4}, raw=True)
-    print(result['result'])
+    result = await BX.call("timeman.schedule.get", items={"id": 4}, raw=True)
+    print(result["result"])
 
 
 async def main():
     import base64
-    with open('src/bitrix/test_cat.jpg', 'rb') as binary_file:
+
+    with open("src/bitrix/test_cat.jpg", "rb") as binary_file:
         binary_file_data = binary_file.read()
     base64_encoded_data = base64.b64encode(binary_file_data)
-    base64_message = base64_encoded_data.decode('utf-8')
-    await upload_file('cat.jpg', base64_message)
+    base64_message = base64_encoded_data.decode("utf-8")
+    await upload_file("cat.jpg", base64_message)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import asyncio
+
     # asyncio.run(create_task({'TITLE': 'test','RESPONSIBLE_ID': 1, 'TIME_ESTIMATE': 60 * 60, 'ALLOW_TIME_TRACKING': 'Y'}))
     asyncio.run(main())
