@@ -1,4 +1,5 @@
-"""Запросики к битриксу"""
+import base64
+
 import aiocache
 from fast_bitrix24 import BitrixAsync
 
@@ -96,8 +97,6 @@ async def get_task():
 
 
 async def main():
-    import base64
-
     with open("src/bitrix/test_cat.jpg", "rb") as binary_file:
         binary_file_data = binary_file.read()
     base64_encoded_data = base64.b64encode(binary_file_data)

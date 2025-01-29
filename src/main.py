@@ -1,14 +1,15 @@
-from fastapi import FastAPI
-from fastapi.exceptions import HTTPException
-from schemas import OrderSchema
-from bitrix.task import Task, UpdateTaskException
-from bitrix.file import Files
 import asyncio
-
-# Для дебага
 import logging
 from datetime import datetime
 
+from fastapi import FastAPI, Query
+from fastapi.exceptions import HTTPException
+
+from bitrix.file import Files
+from bitrix.task import Task, UpdateTaskException
+from schemas import OrderSchema
+from src.bitrix.requests import get_work_schedule
+from src.bitrix.utils import generate_date_range
 
 logger = logging.getLogger("debug_logger")
 logger.setLevel(logging.INFO)
@@ -43,23 +44,23 @@ async def create_tasks(order: OrderSchema):
         if isinstance(e, UpdateTaskException):
             return {
                 "message": "При обновлении задачи произошла ошибка. Скорее всего, "
-                           "некоторые данные в задаче были обновлены, но что-то пошло не так."
+                "некоторые данные в задаче были обновлены, но что-то пошло не так."
             }
         raise HTTPException(500, detail=str(e))
 
 
 @app.get("/worktime/", status_code=200)
-async def get_work_time_periods(start: str, end: str):
+async def get_work_time_periods(
+    start: datetime = Query(..., description="Start time"),
+    end: datetime = Query(..., description="End time"),
+):
     """Отдает массив рабочих дней"""
-    # [
-    #    {
-    #       "start": "2025-01-06T09:00:00+03:00",
-    #        "end": "2025-01-06T18:00:00+03:00"
-    #    },
-    # ...
-    # ]
 
-    return [{"start": start, "end": end}]
+    work_days = await get_work_schedule()
+    data = generate_date_range(start, end, work_days)
+
+    return data
 
 
-# uvicorn main:app --host 0.0.0.0 --port 80
+# if __name__ == "__main__":
+#     uvicorn.run(app, host="0.0.0.0", port=8001)
