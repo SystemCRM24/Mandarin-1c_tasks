@@ -1,8 +1,9 @@
 import asyncio
 from datetime import datetime
 
-from fastapi import FastAPI, Query, Response
+from fastapi import FastAPI, Query
 from fastapi.exceptions import HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 
 from bitrix.file import Files
 from bitrix.task import Task, UpdateTaskException
@@ -11,9 +12,25 @@ from src.bitrix.requests import get_work_schedule
 from src.bitrix.utils.date_range import generate_date_range
 from src.bitrix.utils.logger_util import log_error
 
+
 app = FastAPI(
     title="Постановка задач",
     description="Автоматическая постановка задач для Битрикс24 компании Мандарин на основе POST-запроса.",
+)
+
+origins = [
+    "https://3638421-ng03032.twc1.net",
+    "http://3638421-ng03032.twc1.net",
+    "http://localhost",
+    "http://localhost:8080",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
@@ -47,11 +64,9 @@ async def get_work_time_periods(
     end: datetime = Query(..., description="End time"),
 ):
     """Отдает массив рабочих дней"""
-
     work_days = await get_work_schedule()
     data = generate_date_range(start, end, work_days)
-
-    return Response(content=data, headers={'Access-Control-Allow-Origin': '*'})
+    return data
 
 
 # if __name__ == "__main__":
