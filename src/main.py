@@ -1,7 +1,7 @@
 import asyncio
 from datetime import datetime
 
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, Response
 from fastapi.exceptions import HTTPException
 
 from bitrix.file import Files
@@ -51,7 +51,7 @@ async def get_work_time_periods(
     work_days = await get_work_schedule()
     data = generate_date_range(start, end, work_days)
 
-    return data
+    return Response(content=data, headers={'Access-Control-Allow-Origin': '*'})
 
 
 # if __name__ == "__main__":
