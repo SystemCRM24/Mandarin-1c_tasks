@@ -1,5 +1,4 @@
 import asyncio
-import logging
 from datetime import datetime
 
 from fastapi import FastAPI, Query
@@ -9,12 +8,8 @@ from bitrix.file import Files
 from bitrix.task import Task, UpdateTaskException
 from schemas import OrderSchema
 from src.bitrix.requests import get_work_schedule
-from src.bitrix.utils import generate_date_range
-
-logger = logging.getLogger("debug_logger")
-logger.setLevel(logging.INFO)
-logger.handlers = [logging.FileHandler("log.log", encoding="utf-8")]
-
+from src.bitrix.utils.date_range import generate_date_range
+from src.bitrix.utils.logger_util import log_error
 
 app = FastAPI(
     title="Постановка задач",
@@ -37,10 +32,7 @@ async def create_tasks(order: OrderSchema):
         await asyncio.gather(*tasks)
         return {"message": "ok"}
     except Exception as e:
-        logger.info("-----" * 6)
-        logger.info(str(datetime.now()))
-        logger.info(str(order))
-        logger.error(e, exc_info=True)
+        log_error(e, order)
         if isinstance(e, UpdateTaskException):
             return {
                 "message": "При обновлении задачи произошла ошибка. Скорее всего, "

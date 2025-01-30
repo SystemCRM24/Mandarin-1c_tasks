@@ -9,4 +9,4 @@ services:
     environment:
       - BITRIX_WEBHOOK=${BITRIX_WEBHOOK}
     env_file:
-      - .env  # Опционально, если используете .env файл
+      - .env
