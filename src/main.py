@@ -18,16 +18,16 @@ app = FastAPI(
     description="Автоматическая постановка задач для Битрикс24 компании Мандарин на основе POST-запроса.",
 )
 
-origins = [
-    "https://3638421-ng03032.twc1.net",
-    "http://3638421-ng03032.twc1.net",
-    "http://0.0.0.0",
-    "http://0.0.0.0:8000",
-]
+# origins = [
+#     "https://3638421-ng03032.twc1.net",
+#     "http://3638421-ng03032.twc1.net",
+#     "http://0.0.0.0",
+#     "http://0.0.0.0:8000",
+# ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
