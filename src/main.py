@@ -3,6 +3,7 @@ from datetime import datetime
 
 from fastapi import FastAPI, Query, WebSocket, WebSocketDisconnect
 from fastapi.exceptions import HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 
 from bitrix.file import Files
 from bitrix.task import Task, UpdateTaskException
@@ -12,9 +13,25 @@ from src.bitrix.utils.date_range import generate_date_range
 from src.bitrix.utils.logger_util import log_error
 from src.bitrix.utils.websocket_utils import wait_for_updates
 
+
 app = FastAPI(
     title="Постановка задач",
     description="Автоматическая постановка задач для Битрикс24 компании Мандарин на основе POST-запроса.",
+)
+
+# origins = [
+#     "https://3638421-ng03032.twc1.net",
+#     "http://3638421-ng03032.twc1.net",
+#     "http://0.0.0.0",
+#     "http://0.0.0.0:8000",
+# ]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Хранилище активных соединений
