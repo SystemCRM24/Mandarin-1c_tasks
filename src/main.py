@@ -1,7 +1,7 @@
 import asyncio
 from datetime import datetime
 
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, WebSocket, WebSocketDisconnect
 from fastapi.exceptions import HTTPException
 
 from bitrix.file import Files
@@ -10,11 +10,18 @@ from schemas import OrderSchema
 from src.bitrix.requests import get_work_schedule
 from src.bitrix.utils.date_range import generate_date_range
 from src.bitrix.utils.logger_util import log_error
+from src.bitrix.utils.websocket_utils import wait_for_updates
 
 app = FastAPI(
     title="Постановка задач",
     description="Автоматическая постановка задач для Битрикс24 компании Мандарин на основе POST-запроса.",
 )
+
+# Хранилище активных соединений
+active_connections: list[WebSocket] = []
+
+
+data_update_event = asyncio.Event()
 
 
 @app.get("/ping/", status_code=200)
@@ -54,5 +61,27 @@ async def get_work_time_periods(
     return data
 
 
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    active_connections.append(websocket)
+
+    try:
+        while True:
+            # Запускаем задачу ожидания обновлений
+            await wait_for_updates(..., data_update_event, websocket)
+    except WebSocketDisconnect:
+        active_connections.remove(websocket)
+
+
+# Эндпоинт для симуляции события обновления данных
+@app.post("/update-data")
+async def update_data():
+    # Здесь можно заменить data_example на актуальные данные
+    data_update_event.set()
+    return {"status": "success"}
+
+
 # if __name__ == "__main__":
+#     import uvicorn
 #     uvicorn.run(app, host="0.0.0.0", port=8001)
