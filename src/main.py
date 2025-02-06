@@ -11,8 +11,7 @@ from schemas import OrderSchema
 from src.bitrix.requests import get_work_schedule
 from src.bitrix.utils.date_range import generate_date_range
 from src.bitrix.utils.logger_util import log_error
-from src.bitrix.utils.websocket_utils import wait_for_updates
-
+from src.bitrix.utils.websocket_utils import data_validator
 
 app = FastAPI(
     title="Постановка задач",
@@ -79,24 +78,30 @@ async def get_work_time_periods(
 
 
 @app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
+async def websocket_endpoint(
+    websocket: WebSocket,
+    start: datetime = Query(..., description="Start time"),
+    end: datetime = Query(..., description="End time"),
+):
     await websocket.accept()
     active_connections.append(websocket)
 
+    data_update_event.set()
+
+    data_to_send = await data_validator(start, end)
+
     try:
         while True:
-            # Запускаем задачу ожидания обновлений
-            await wait_for_updates(..., data_update_event, websocket)
+            # Отправляем данные всем подключенным клиентам
+            for connection in active_connections:
+                await connection.send_json(data_to_send)
+
+            # Сбрасываем событие
+            data_update_event.clear()
+
+            # Ожидаем следующего события
     except WebSocketDisconnect:
         active_connections.remove(websocket)
-
-
-# Эндпоинт для симуляции события обновления данных
-@app.post("/update-data")
-async def update_data():
-    # Здесь можно заменить data_example на актуальные данные
-    data_update_event.set()
-    return {"status": "success"}
 
 
 # if __name__ == "__main__":
