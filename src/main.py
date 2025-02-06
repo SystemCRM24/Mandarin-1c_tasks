@@ -86,7 +86,7 @@ async def websocket_endpoint(
     await websocket.accept()
     active_connections.append(websocket)
 
-    data_update_event.set()
+    # data_update_event.set()  # Добавить к ивентам
 
     data_to_send = await data_validator(start, end)
 
