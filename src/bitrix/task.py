@@ -3,16 +3,10 @@ import math
 from datetime import datetime, timezone, timedelta
 
 from src.schemas import OrderSchema, CalculationItem
-from .bx_calendar import Calendar
-from .file import Files
-from src.bitrix.requests import (
-    get_department_id_from_name,
-    get_staff_from_department_id,
-    get_staff_tasks,
-    get_department_head_from_name,
-    create_task,
-    update_task,
-)
+from .bxcalendar import BXCalendar
+from .file import FileUploader
+from . import requests
+
 
 CORRECTION = timedelta(hours=3)
 MOSCOW_TIME_ZONE = timezone(CORRECTION, "ETC")
@@ -26,14 +20,14 @@ class UpdateTaskException(Exception):
 class Task:
     """Класс - интерфейс для работы с задачами"""
 
-    def __init__(self, order: OrderSchema, calculation: CalculationItem, files: Files):
+    def __init__(self, order: OrderSchema, calculation: CalculationItem, files: FileUploader):
         self.order = order
         self.calculation = calculation
         self.files = files
         # Технические переменные
         self.staff: list = None
         self.staff_tasks: list = None
-        self.staff_calendar = Calendar(calculation.position)
+        self.staff_calendar = BXCalendar.for_schedule()
         # Переменные для запроса
         self.task_name: str = None
         self.rapist_id: int = 1
@@ -45,7 +39,7 @@ class Task:
         self._preprocessing()
         await asyncio.gather(
             self.files.atask,
-            self.staff_calendar.update(),
+            self.staff_calendar._update(),
             self._update_staff_info(),
             self._select_rapist(),
         )
@@ -61,13 +55,13 @@ class Task:
 
     async def _update_staff_info(self):
         """Обновляет информацию по подразделению и сотрудникам"""
-        department_id = await get_department_id_from_name(self.calculation.position)
-        self.staff = await get_staff_from_department_id(department_id)
-        self.staff_tasks = await get_staff_tasks(self.staff)
+        department_id = await requests.get_department_id_from_name(self.calculation.position)
+        self.staff = await requests.get_staff_from_department_id(department_id)
+        self.staff_tasks = await requests.get_staff_tasks(self.staff)
 
     async def _select_rapist(self):
         """Устанавливает постановщика задачи"""
-        self.rapist_id = await get_department_head_from_name(self.order.executor)
+        self.rapist_id = await requests.get_department_head_from_name(self.order.executor)
 
     def _select_victim(self):
         """
@@ -92,18 +86,16 @@ class Task:
                 if self.victim_last_deadline is None or current_deadline < self.victim_last_deadline:
                     self.victim_last_deadline = current_deadline
                     self.victim = self.staff[i]
-        return create_task
+        return requests.create_task
 
     @staticmethod
     def _update_task_wrapper(task_id: int | str):
         """Обертка для обновления задачи"""
-
         async def wrapper(request_data: dict):
             try:
-                await update_task(task_id, request_data)
+                await requests.update_task(task_id, request_data)
             except:
                 raise UpdateTaskException("Ошибка обновления задачи")
-
         return wrapper
 
     def _get_request(self) -> dict:
@@ -126,7 +118,10 @@ class Task:
 
     def _get_task_description(self) -> str:
         """Возвращает описание задачи"""
-        string = (f"Сумма: {self.calculation.amount}", f"Рекомендуемая дата сдачи: {self.order.completion_date}")
+        string = (
+            f"Сумма: {self.calculation.amount}", 
+            f"Рекомендуемая дата сдачи: {self.order.completion_date}"
+        )
         return "\n".join(string)
 
     def _get_deadline_date(self) -> datetime:

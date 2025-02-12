@@ -1,10 +1,10 @@
-import base64
-
-import aiocache
 from fast_bitrix24 import BitrixAsync
+import aiocache
 
-from src.config import BITRIX_WEBHOOK
+from os import environ
 
+
+BITRIX_WEBHOOK = environ.get('BITRIX_WEBHOOK')
 BX = BitrixAsync(BITRIX_WEBHOOK)
 
 
@@ -91,21 +91,8 @@ async def get_work_schedule(id: int | str = 1) -> dict:
     return result["result"]
 
 
-async def get_task():
-    result = await BX.call("timeman.schedule.get", items={"id": 4}, raw=True)
-    print(result["result"])
+# if __name__ == "__main__":
+#     import asyncio
 
-
-async def main():
-    with open("src/bitrix/test_cat.jpg", "rb") as binary_file:
-        binary_file_data = binary_file.read()
-    base64_encoded_data = base64.b64encode(binary_file_data)
-    base64_message = base64_encoded_data.decode("utf-8")
-    await upload_file("cat.jpg", base64_message)
-
-
-if __name__ == "__main__":
-    import asyncio
-
-    # asyncio.run(create_task({'TITLE': 'test','RESPONSIBLE_ID': 1, 'TIME_ESTIMATE': 60 * 60, 'ALLOW_TIME_TRACKING': 'Y'}))
-    asyncio.run(main())
+#     # asyncio.run(create_task({'TITLE': 'test','RESPONSIBLE_ID': 1, 'TIME_ESTIMATE': 60 * 60, 'ALLOW_TIME_TRACKING': 'Y'}))
+#     asyncio.run(main())

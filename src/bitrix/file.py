@@ -4,13 +4,12 @@ from src.bitrix.requests import upload_file
 from src.schemas import AttachedFilesItem
 
 
-class Files:
+class FileUploader:
     """Класс для работы с отправляемыми на сервер файлами"""
 
     def __init__(self, files_to_upload: list[AttachedFilesItem]):
         self.files_to_upload = files_to_upload
         self.request = []
-        self.atask = create_task(self.upload())
 
     async def upload(self):
         """Загружает файлы на сервер"""

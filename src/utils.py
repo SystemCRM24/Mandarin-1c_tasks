@@ -2,9 +2,8 @@ import logging
 from datetime import datetime
 
 
-def log_error(e, info=None):
+async def log_error(e, info=None):
     """Логирование ошибок. Передаём ошибку и дополнительную информацию"""
-
     logger = logging.getLogger("debug_logger")
     logger.setLevel(logging.INFO)
     logger.handlers = [logging.FileHandler("log.log", encoding="utf-8")]

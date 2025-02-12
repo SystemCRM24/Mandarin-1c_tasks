@@ -8,7 +8,7 @@ from src.bitrix.utils.date_range import generate_date_range
 from src.bitrix.websocket_schemas import DepartmentSchema, ResultSchema, StaffSchema, TaskSchema
 
 
-async def data_validator(start, end):
+async def fetch_task_data():
     """Валидирует данные"""
 
     staff_lst = []  # для передачи в get_staff_tasks
