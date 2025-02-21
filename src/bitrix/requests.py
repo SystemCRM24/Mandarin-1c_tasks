@@ -84,7 +84,6 @@ async def upload_file(name: str, binary_str: str) -> dict:
     return result["result"]
 
 
-@aiocache.cached(ttl=60 * 60 * 24, namespace="work_schedule")
 async def get_work_schedule(id: int | str = 1) -> dict:
     """Получает настройки рабочего графика. По умолчанию - график под номером 1: для всех."""
     result = await BX.call("timeman.schedule.get", items={"id": id}, raw=True)

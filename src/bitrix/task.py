@@ -3,7 +3,7 @@ import math
 from datetime import datetime, timezone, timedelta
 
 from src.schemas import OrderSchema, CalculationItem
-from .bxcalendar import BXCalendar
+from .schedule import BXSchedule
 from .file import FileUploader
 from . import requests
 
@@ -27,7 +27,7 @@ class Task:
         # Технические переменные
         self.staff: list = None
         self.staff_tasks: list = None
-        self.staff_calendar = BXCalendar.for_schedule()
+        self.staff_calendar = BXSchedule.for_schedule()
         # Переменные для запроса
         self.task_name: str = None
         self.rapist_id: int = 1

@@ -4,12 +4,12 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.exceptions import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-from bitrix.file import FileUploader
-from bitrix.task import Task, UpdateTaskException
-from schemas import OrderSchema
+from src.bitrix.file import FileUploader
+from src.bitrix.task import Task, UpdateTaskException
+from src.schemas import OrderSchema
 
-from utils import log_error
-from service import fetch_websocket_data
+from src.utils import log_error
+from src.service import fetch_websocket_data
 
 
 app = FastAPI(
@@ -45,6 +45,17 @@ async def create_tasks(order: OrderSchema):
         if isinstance(e, UpdateTaskException):
             return {"message": "Ошибка при обновлении задачи. Некоторые данные могли не сохраниться."}
         raise HTTPException(500, detail=str(e))
+    
+
+@app.get("/fetch_data/", tags=['Front'])
+async def fetch_data():
+    """Тестирование корректности отправляемых данных"""
+    return await fetch_websocket_data()
+
+
+@app.patch('/update_task/', tags=['Front'])
+async def update_task():
+    """Обновление задачи"""
 
 
 # Хранилище активных соединений
