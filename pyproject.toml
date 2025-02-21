@@ -9,4 +9,5 @@ dependencies = [
     "fast-bitrix24>=1.8.4",
     "fastapi>=0.115.8",
     "uvicorn>=0.34.0",
+    "websockets>=15.0",
 ]
