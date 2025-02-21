@@ -53,6 +53,13 @@ async def fetch_data():
     return await fetch_websocket_data()
 
 
+@app.get('/trigger_event/', tags=['Front'])
+async def trigger_event():
+    """Тригеррит эвент на обновление вебсокетов"""
+    UPDATE_EVENT.set()
+    return {'message': 'Event triggered'}
+
+
 @app.patch('/update_task/', tags=['Front'])
 async def update_task():
     """Обновление задачи"""
