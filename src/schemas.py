@@ -39,7 +39,7 @@ class UpdateTaskSchema(BaseModel):
     START_DATE_PLAN: str
     END_DATE_PLAN: str
     DEADLINE: str
-    TIME_ESTIMATE: str
+    TIME_ESTIMATE: int
 
 
 class DepartmentSchema(BaseModel):
