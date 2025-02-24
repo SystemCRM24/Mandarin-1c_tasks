@@ -64,7 +64,7 @@ async def generate_total_range(start: datetime, end: datetime) -> dict:
     # Энд округляем в потолок
     to_add = 6 - end.weekday()
     end_of_week = (end + timedelta(days=to_add)).replace(hour=23, minute=59, second=59)
-    return {'start': start_of_week, 'end': end_of_week}
+    return {'start': start_of_week.isoformat(), 'end': end_of_week.isoformat()}
 
 
 async def generate_workdate_ranges(interval: dict) -> list[dict]:
@@ -72,12 +72,13 @@ async def generate_workdate_ranges(interval: dict) -> list[dict]:
     main_schedule = schedule.BXSchedule()
     await main_schedule.update_from_bxschedule(1)   # ИД основного расписания
     ranges = []
-    day: datetime = interval['start']
-    while day < interval['end']:
+    day = datetime.fromisoformat(interval['start'])
+    interval_end = datetime.fromisoformat(interval['end'])
+    while day < interval_end:
         if main_schedule.is_working_day(day):
             ranges.append({
-                'start': day + main_schedule.work_time_start,
-                'end': day + main_schedule.work_time_end
+                'start': (day + main_schedule.work_time_start).isoformat(),
+                'end': (day + main_schedule.work_time_end).isoformat()
             })
         day += timedelta(days=1)
     return ranges

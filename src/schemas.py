@@ -30,6 +30,18 @@ class OrderSchema(BaseModel):
     attached_files: List[AttachedFilesItem] = Field(alias="ПрисоединенныеФайлы", default_factory=list)
 
 
+class UpdateTaskSchema(BaseModel):
+    """
+    Схема для обновления задачи.
+    Парсить что-то нет необходимости, так как данные используются просто для пересыла.
+    """
+    RESPONSIBLE_ID: str
+    START_DATE_PLAN: str
+    END_DATE_PLAN: str
+    DEADLINE: str
+    TIME_ESTIMATE: str
+
+
 class DepartmentSchema(BaseModel):
     ID: str
     NAME: str

@@ -1,4 +1,5 @@
 import asyncio
+import aiohttp
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.exceptions import HTTPException
@@ -6,8 +7,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from src.bitrix.file import FileUploader
 from src.bitrix.task import Task, UpdateTaskException
-from src.schemas import OrderSchema
+from src.bitrix import requests
 
+from src.schemas import OrderSchema, UpdateTaskSchema
 from src.utils import log_error
 from src.service import fetch_websocket_data
 
@@ -60,11 +62,18 @@ async def trigger_event():
     return {'message': 'Event triggered'}
 
 
-@app.patch('/update_task/', tags=['Front'])
-async def update_task():
+@app.patch('/update_task/{task_id}', tags=['Front'])
+async def update_task(task_id: int, data: UpdateTaskSchema):
     """Обновление задачи"""
-
-
+    try:
+        await requests.update_task(task_id, data)
+        msg = {"message": "ok"}
+    except:
+        msg = {"message": "Ошибка при обновлении задачи. Некоторые данные могли не сохраниться."}
+    UPDATE_EVENT.set()
+    return msg
+    
+    
 # Хранилище активных соединений
 CONNECTIONS: list[WebSocket] = []
 UPDATE_EVENT = asyncio.Event()
@@ -80,6 +89,7 @@ async def websocket_endpoint(websocket: WebSocket):
             data = await fetch_websocket_data()
             async with asyncio.TaskGroup() as group:
                 for connection in CONNECTIONS:
+                    connection.send_json
                     group.create_task(connection.send_json(data))
             await UPDATE_EVENT.wait();
     except WebSocketDisconnect:
