@@ -66,7 +66,7 @@ async def trigger_event():
 async def update_task(task_id: int, data: UpdateTaskSchema):
     """Обновление задачи"""
     try:
-        await requests.update_task(task_id, data)
+        await requests.update_task(task_id, data.model_dump())
         msg = {"message": "ok"}
     except:
         msg = {"message": "Ошибка при обновлении задачи. Некоторые данные могли не сохраниться."}
