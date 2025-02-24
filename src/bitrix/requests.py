@@ -3,6 +3,9 @@ import aiocache
 
 from os import environ
 
+import dotenv
+dotenv.load_dotenv()
+
 
 BITRIX_WEBHOOK = environ.get('BITRIX_WEBHOOK')
 BX = BitrixAsync(BITRIX_WEBHOOK)
