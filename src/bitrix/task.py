@@ -30,9 +30,9 @@ class Task:
         self.staff_calendar = BXSchedule()
         # Переменные для запроса
         self.task_name: str = None
-        self.rapist_id: int = 1
-        self.victim: dict = None
-        self.victim_last_deadline: datetime = None
+        self.assigner_id: int = 1
+        self.performer: dict = None
+        self.performers_last_deadline: datetime = None
 
     async def put_task(self):
         """Ставит задачу"""
@@ -41,9 +41,9 @@ class Task:
             self.files.upload_event.wait(),
             self.staff_calendar.update_from_bxschedule(),
             self._update_staff_info(),
-            self._select_rapist(),
+            self._select_assigner(),
         )
-        handler = self._select_victim()
+        handler = self._select_performer()
         await handler(self._get_request())
 
     def _preprocessing(self):
@@ -59,11 +59,11 @@ class Task:
         self.staff = await requests.get_staff_from_department_id(department_id)
         self.staff_tasks = await requests.get_staff_tasks(self.staff)
 
-    async def _select_rapist(self):
+    async def _select_assigner(self):
         """Устанавливает постановщика задачи"""
-        self.rapist_id = await requests.get_department_head_from_name(self.order.executor)
+        self.assigner_id = await requests.get_department_head_from_name(self.order.executor)
 
-    def _select_victim(self):
+    def _select_performer(self):
         """
         Определяет человека, которому будет поставлена задача
         и время последней задачи, по которой будет производиться подсчет
@@ -74,18 +74,18 @@ class Task:
             victim = self.staff[i]
             victim_tasks = self.staff_tasks[i]
             if not victim_tasks:
-                self.victim_last_deadline = datetime.now(UTC)
-                self.victim = victim
+                self.performers_last_deadline = datetime.now(UTC)
+                self.performer = victim
                 break
             for task in victim_tasks:
                 if task["title"] == self.task_name:  # В случае обновления задачи
-                    self.victim_last_deadline = datetime.fromisoformat(task["dateStart"])
-                    self.victim = victim
+                    self.performers_last_deadline = datetime.fromisoformat(task["dateStart"])
+                    self.performer = victim
                     return self._update_task_wrapper(task["id"])
                 current_deadline = datetime.fromisoformat(task["deadline"])
-                if self.victim_last_deadline is None or current_deadline < self.victim_last_deadline:
-                    self.victim_last_deadline = current_deadline
-                    self.victim = self.staff[i]
+                if self.performers_last_deadline is None or current_deadline < self.performers_last_deadline:
+                    self.performers_last_deadline = current_deadline
+                    self.performer = self.staff[i]
         return requests.create_task
 
     @staticmethod
@@ -104,12 +104,12 @@ class Task:
         return {
             "TITLE": self.task_name,
             "GROUP_ID": 1,  # задачи из 1с
-            "CREATED_BY": self.rapist_id,
-            "RESPONSIBLE_ID": self.victim["ID"],
+            "CREATED_BY": self.assigner_id,
+            "RESPONSIBLE_ID": self.performer["ID"],
             "DESCRIPTION": self._get_task_description(),
-            "DATE_START": self.victim_last_deadline,
+            "DATE_START": self.performers_last_deadline,
             "DEADLINE": deadline,
-            "START_DATE_PLAN": self.victim_last_deadline,
+            "START_DATE_PLAN": self.performers_last_deadline,
             "END_DATE_PLAN": deadline,
             "TIME_ESTIMATE": self.calculation.time,
             "UF_TASK_WEBDAV_FILES": self.files.uploaded_files,
@@ -131,7 +131,7 @@ class Task:
         Иначе битрикс будет ее интерпретировать по своему. Не смотря на то, что сам битрикс отдает дату в utc.
         В случае заказчика, это было важно, так как учитывалось рабочее время сотрудника.
         """
-        deadline = self.victim_last_deadline.replace(tzinfo=MOSCOW_TIME_ZONE) + CORRECTION
+        deadline = self.performers_last_deadline.replace(tzinfo=MOSCOW_TIME_ZONE) + CORRECTION
         task_duration = timedelta(seconds=self.calculation.time)
         # Прибавляем дни по рабочим часам
         while task_duration > self.staff_calendar.work_day_duration:

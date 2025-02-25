@@ -25,7 +25,7 @@ async def get_department_head_from_name(name: str) -> str:
     departments = await get_department_info()
     for department in departments:
         if department["NAME"] == name:
-            return department["UF_HEAD"]
+            return department.get("UF_HEAD", '1')
     return "1"
 
 
