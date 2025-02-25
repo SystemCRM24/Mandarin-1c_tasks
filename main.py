@@ -47,7 +47,7 @@ async def create_tasks(order: OrderSchema):
                 group.create_task(bx_task.put_task())
         return {"message": "ok"}
     except Exception as e:
-        asyncio.create_task(log_error(e, order))
+        asyncio.create_task(log_error(e))
         if isinstance(e, UpdateTaskException):
             return {"message": "Ошибка при обновлении задачи. Некоторые данные могли не сохраниться."}
         raise HTTPException(500, detail=str(e))
