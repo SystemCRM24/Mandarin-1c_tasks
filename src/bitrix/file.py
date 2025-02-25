@@ -14,6 +14,7 @@ class FileUploader:
 
     async def upload(self):
         """Загружает файлы на сервер"""
+        print('start file upload')
         self.upload_event.clear()
         if self.files_to_upload:
             tasks = (upload_file(i.name, i.binary) for i in self.files_to_upload)
@@ -21,3 +22,4 @@ class FileUploader:
             for file in response:
                 self.uploaded_files.append("n" + str(file["ID"]))
         self.upload_event.set()
+        print('end file upload')
