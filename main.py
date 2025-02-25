@@ -30,7 +30,7 @@ app.add_middleware(
 app.include_router(ws_router)
 
 
-@app.get("", status_code=200, tags=['1c'])
+@app.get("/", status_code=200, tags=['1c'])
 async def ping():
     """Пингует сервер"""
     return {"message": "Pong"}
