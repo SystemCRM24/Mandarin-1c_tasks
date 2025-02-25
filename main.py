@@ -39,21 +39,19 @@ async def ping():
 @app.post("/create_task", status_code=200, tags=['1c'])
 async def create_tasks(order: OrderSchema):
     """Создание задач"""
-    try:
-        async with asyncio.TaskGroup() as group:
-            file_handler = FileUploader(order.attached_files)
-            upload_task = group.create_task(file_handler.upload())
-            file_handler.atask = upload_task
-            print('files ok')
-            for calculation in order.calculation:
-                bx_task = Task(order, calculation, file_handler)
-                group.create_task(bx_task.put_task())
-        return {"message": "ok"}
-    except Exception as e:
-        asyncio.create_task(log_error(e))
-        if isinstance(e, UpdateTaskException):
-            return {"message": "Ошибка при обновлении задачи. Некоторые данные могли не сохраниться."}
-        raise HTTPException(500, detail=str(e))
+    # try:
+    async with asyncio.TaskGroup() as tg:
+        file_handler = FileUploader(order.attached_files)
+        tg.create_task(file_handler.upload())
+        for calculation in order.calculation:
+            bx_task = Task(order, calculation, file_handler)
+            tg.create_task(bx_task.put_task())
+    return {"message": "ok"}
+    # except Exception as e:
+    #     asyncio.create_task(log_error(e))
+    #     if isinstance(e, UpdateTaskException):
+    #         return {"message": "Ошибка при обновлении задачи. Некоторые данные могли не сохраниться."}
+    #     raise HTTPException(500, detail=str(e))
     
 
 @app.get("/fetch_data", tags=['Front'])

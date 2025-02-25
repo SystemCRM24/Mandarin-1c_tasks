@@ -27,7 +27,7 @@ class Task:
         # Технические переменные
         self.staff: list = None
         self.staff_tasks: list = None
-        self.staff_calendar = BXSchedule.for_schedule()
+        self.staff_calendar = BXSchedule()
         # Переменные для запроса
         self.task_name: str = None
         self.rapist_id: int = 1
@@ -38,8 +38,8 @@ class Task:
         """Ставит задачу"""
         self._preprocessing()
         await asyncio.gather(
-            self.files.atask,
-            self.staff_calendar._update(),
+            self.files.upload_event.wait(),
+            self.staff_calendar.update_from_bxschedule(),
             self._update_staff_info(),
             self._select_rapist(),
         )
@@ -112,7 +112,7 @@ class Task:
             "START_DATE_PLAN": self.victim_last_deadline,
             "END_DATE_PLAN": deadline,
             "TIME_ESTIMATE": self.calculation.time,
-            "UF_TASK_WEBDAV_FILES": self.files.request,
+            "UF_TASK_WEBDAV_FILES": self.files.uploaded_files,
             "ALLOW_TIME_TRACKING": "Y",
         }
 
