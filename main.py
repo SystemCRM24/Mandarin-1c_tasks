@@ -41,9 +41,11 @@ async def create_tasks(order: OrderSchema):
     """Создание задач"""
     try:
         async with asyncio.TaskGroup() as group:
-            files = group.create_task(FileUploader(order.attached_files).upload())
+            file_handler = FileUploader(order.attached_files)
+            upload_task = group.create_task(file_handler.upload())
+            file_handler.atask = upload_task
             for calculation in order.calculation:
-                bx_task = Task(order, calculation, files)
+                bx_task = Task(order, calculation, file_handler)
                 group.create_task(bx_task.put_task())
         return {"message": "ok"}
     except Exception as e:
