@@ -10,3 +10,5 @@ services:
       - BITRIX_WEBHOOK=${BITRIX_WEBHOOK}
     env_file:
       - .env
+    volumes:
+      - ./logs:/app/logs
