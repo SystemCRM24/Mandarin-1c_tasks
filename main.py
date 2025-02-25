@@ -1,7 +1,6 @@
 import asyncio
-import aiohttp
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI
 from fastapi.exceptions import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -12,12 +11,14 @@ from src.bitrix import requests
 from src.schemas import OrderSchema, UpdateTaskSchema
 from src.utils import log_error
 from src.service import fetch_websocket_data
+from src.websocket import ws_router, UPDATE_EVENT
 
 
 app = FastAPI(
     title="Постановка задач",
     description="Автоматическая постановка задач для Битрикс24 компании Мандарин на основе POST-запроса.",
 )
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -26,14 +27,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(ws_router)
 
-@app.get("/", status_code=200, tags=['1c'])
+
+@app.get("", status_code=200, tags=['1c'])
 async def ping():
     """Пингует сервер"""
     return {"message": "Pong"}
 
 
-@app.post("/", status_code=200, tags=['1c'])
+@app.post("/create_task", status_code=200, tags=['1c'])
 async def create_tasks(order: OrderSchema):
     """Создание задач"""
     try:
@@ -49,13 +52,13 @@ async def create_tasks(order: OrderSchema):
         raise HTTPException(500, detail=str(e))
     
 
-@app.get("/fetch_data/", tags=['Front'])
+@app.get("/fetch_data", tags=['Front'])
 async def fetch_data():
     """Тестирование корректности отправляемых данных"""
     return await fetch_websocket_data()
 
 
-@app.get('/trigger_event/', tags=['Front'])
+@app.get('/trigger_event', tags=['Front'])
 async def trigger_event():
     """Тригеррит эвент на обновление вебсокетов"""
     UPDATE_EVENT.set()
@@ -72,25 +75,3 @@ async def update_task(task_id: int, data: UpdateTaskSchema):
         msg = {"message": "Ошибка при обновлении задачи. Некоторые данные могли не сохраниться."}
     UPDATE_EVENT.set()
     return msg
-    
-    
-# Хранилище активных соединений
-CONNECTIONS: list[WebSocket] = []
-UPDATE_EVENT = asyncio.Event()
-
-
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    await websocket.accept()
-    CONNECTIONS.append(websocket)
-    try:
-        while True:
-            UPDATE_EVENT.clear()
-            data = await fetch_websocket_data()
-            async with asyncio.TaskGroup() as group:
-                for connection in CONNECTIONS:
-                    connection.send_json
-                    group.create_task(connection.send_json(data))
-            await UPDATE_EVENT.wait();
-    except WebSocketDisconnect:
-        CONNECTIONS.remove(websocket)
