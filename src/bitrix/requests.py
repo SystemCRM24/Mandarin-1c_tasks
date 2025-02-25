@@ -1,13 +1,14 @@
 from fast_bitrix24 import BitrixAsync
 import aiocache
-
 from os import environ
-
-import dotenv
-dotenv.load_dotenv()
 
 
 BITRIX_WEBHOOK = environ.get('BITRIX_WEBHOOK')
+if BITRIX_WEBHOOK is None:
+    import dotenv
+    BITRIX_WEBHOOK = dotenv.dotenv_values().get('BITRIX_WEBHOOK')
+
+
 BX = BitrixAsync(BITRIX_WEBHOOK)
 
 
