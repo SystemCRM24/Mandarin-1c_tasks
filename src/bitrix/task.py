@@ -100,7 +100,7 @@ class Task:
 
     def _get_request(self) -> dict:
         """Формирует ответ для постановки или обновления задачи. Записываем под формат битрикса"""
-        deadline = (self._get_deadline_date(),)
+        deadline = self._get_deadline_date()
         return {
             "TITLE": self.task_name,
             "GROUP_ID": 1,  # задачи из 1с
