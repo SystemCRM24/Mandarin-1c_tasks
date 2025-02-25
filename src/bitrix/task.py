@@ -37,12 +37,14 @@ class Task:
     async def put_task(self):
         """Ставит задачу"""
         self._preprocessing()
+        print('start put')
         await asyncio.gather(
             self.files.upload_event.wait(),
             self.staff_calendar.update_from_bxschedule(),
             self._update_staff_info(),
             self._select_assigner(),
         )
+        print('end put')
         handler = self._select_performer()
         await handler(self._get_request())
 
