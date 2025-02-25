@@ -44,6 +44,7 @@ async def create_tasks(order: OrderSchema):
             file_handler = FileUploader(order.attached_files)
             upload_task = group.create_task(file_handler.upload())
             file_handler.atask = upload_task
+            print('files ok')
             for calculation in order.calculation:
                 bx_task = Task(order, calculation, file_handler)
                 group.create_task(bx_task.put_task())
