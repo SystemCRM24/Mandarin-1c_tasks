@@ -12,6 +12,15 @@ if BITRIX_WEBHOOK is None:
 BX = BitrixAsync(BITRIX_WEBHOOK)
 
 
+def debug(func):
+    async def wrapper(*args, **kwargs):
+        print('strart', func.__name__, args, kwargs)
+        result = await func(*args, **kwargs)
+        print('end', func.__name__, result)
+        return result
+    return wrapper
+
+
 async def get_department_id_from_name(name: str) -> str:
     """Получает id подразделения по его имени. Если не нашло, то вернет id администрации"""
     departments = await get_department_info()
@@ -31,12 +40,14 @@ async def get_department_head_from_name(name: str) -> str:
 
 
 @Cached(ttl=60 * 60 * 24, namespace="department")
+@debug
 async def get_department_info() -> list:
     """Возвращает информацию"""
     return await BX.get_all("department.get")
 
 
 @Cached(ttl=60 * 60 * 4, namespace="staff")
+@debug
 async def get_staff_from_department_id(department_id: str) -> list:
     """Получает персонал подразделения. Если ничего нет, то возвращает персонал админского подразделения"""
     response = await BX.get_all("user.get", params={"UF_DEPARTMENT": department_id})
@@ -45,7 +56,7 @@ async def get_staff_from_department_id(department_id: str) -> list:
         return await get_staff_from_department_id(admin_department_id)
     return response
 
-
+@debug
 async def get_staff_tasks(staff: list):
     """Получает задачи персонала по переданному списку"""
     params = {"halt": 0, "cmd": {}}
@@ -66,6 +77,7 @@ async def update_task(task_id: int | str, request_data: dict):
     await BX.call(method="tasks.task.update", items={"taskId": task_id, "fields": request_data})
 
 
+@debug
 async def upload_file(name: str, binary_str: str) -> dict:
     """
     Загружает файлы на диск в папку прикрепленные файлы
