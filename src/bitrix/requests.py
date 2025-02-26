@@ -1,6 +1,6 @@
 from fast_bitrix24 import BitrixAsync
-import aiocache
 from os import environ
+from .service import Cached
 
 
 BITRIX_WEBHOOK = environ.get('BITRIX_WEBHOOK')
@@ -30,13 +30,13 @@ async def get_department_head_from_name(name: str) -> str:
     return "1"
 
 
-@aiocache.cached(ttl=60 * 60 * 24, namespace="department")
+@Cached(ttl=60 * 60 * 24, namespace="department")
 async def get_department_info() -> list:
     """Возвращает информацию"""
     return await BX.get_all("department.get")
 
 
-@aiocache.cached(ttl=60 * 60 * 4, namespace="staff")
+@Cached(ttl=60 * 60 * 4, namespace="staff")
 async def get_staff_from_department_id(department_id: str) -> list:
     """Получает персонал подразделения. Если ничего нет, то возвращает персонал админского подразделения"""
     response = await BX.get_all("user.get", params={"UF_DEPARTMENT": department_id})
