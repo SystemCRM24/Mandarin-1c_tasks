@@ -42,7 +42,4 @@ class OrderSchema(BaseModel):
     @classmethod
     def validate_datetime(cls, value: str) -> datetime:
         """Парсим время и приводим его к часовому поясу Москвы"""
-        print(value)
-        parsed = datetime.fromisoformat(value).replace(tzinfo=ZoneInfo('Europe/Moscow'))
-        print(parsed)
-        return parsed
+        return datetime.fromisoformat(value).replace(tzinfo=ZoneInfo('Europe/Moscow'))
