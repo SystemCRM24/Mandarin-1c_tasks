@@ -141,7 +141,6 @@ class Task:
             "UF_TASK_WEBDAV_FILES": self.files.uploaded_files,
             "ALLOW_TIME_TRACKING": "Y",
         }
-        print(request)
         return request
 
     def _get_task_description(self) -> str:
