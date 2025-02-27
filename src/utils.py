@@ -10,10 +10,10 @@ debug_logger.handlers = [logging.FileHandler("logs/debug.log", encoding="utf-8")
 separator = '---------- {0} ----------'
 
 
-async def debug_log(e, info=None):
+async def debug_log(e: Exception, info=None):
     """Логирование ошибок. Передаём ошибку и дополнительную информацию"""
     debug_logger.info(separator.format(datetime.now()))
-    debug_logger.error(e, exc_info=True)
+    debug_logger.exception(e)
     if info:
         debug_logger.info(str(info))
 
