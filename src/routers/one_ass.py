@@ -12,7 +12,6 @@ router = APIRouter(tags=['1c'])
 @router.post("/create_task", status_code=200)
 async def create_tasks(order: OrderSchema):
     """Создание задач"""
-    asyncio.create_task(utils.log_schema(order))
     try:
         file_uploader = bitrix.file.FileUploader(order.attached_files)
         asyncio.create_task(file_uploader.upload())
