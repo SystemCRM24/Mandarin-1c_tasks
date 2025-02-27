@@ -108,7 +108,7 @@ class Task:
                     self.performer = performer
                     self.performers_last_deadline = task.dateStart
                     return self._update_task_wrapper(task.id)
-                if self.performers_last_deadline is None or task.deadline < self.performers_last_deadline:
+                if self.performers_last_deadline is None or task.deadline > self.performers_last_deadline:
                     self.performer = self.staff[i]
                     self.performers_last_deadline = task.deadline
         if self.performers_last_deadline is None or now > self.performers_last_deadline:
