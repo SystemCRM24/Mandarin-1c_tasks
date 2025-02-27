@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field, field_validator
 from math import ceil as match_ceil
 from typing import List
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 
 class CalculationItem(BaseModel):
@@ -36,3 +37,12 @@ class OrderSchema(BaseModel):
     acceptance_date: datetime = Field(alias="ДатаПриема")
     calculation: List[CalculationItem] = Field(alias="Калькуляция")
     attached_files: List[AttachedFilesItem] = Field(alias="ПрисоединенныеФайлы", default_factory=list)
+
+    @field_validator('date', mode='before')
+    @classmethod
+    def validate_datetime(cls, value: str) -> datetime:
+        """Парсим время и приводим его к часовому поясу Москвы"""
+        print(value)
+        parsed = datetime.fromisoformat(value).replace(tzinfo=ZoneInfo('Europe/Moscow'))
+        print(parsed)
+        return parsed
