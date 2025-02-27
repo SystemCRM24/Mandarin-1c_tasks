@@ -1,6 +1,7 @@
 import asyncio
 from os import environ
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 from src.schemas.one_ass import OrderSchema, CalculationItem
 from src.schemas.main import TaskResponseSchema, DepartmentSchema, UserSchema
@@ -9,11 +10,8 @@ from .file import FileUploader
 from . import requests
 
 
-CORRECTION = timedelta(hours=3)
-MOSCOW_TIME_ZONE = timezone(CORRECTION, "ETC")
-UTC = timezone(timedelta(hours=0), "utc")
-
 DIRECTOR_ID = environ.get('DIRECTOR_ID')
+MOSCOW_TIME_ZONE = ZoneInfo('Europe/Moscow')
 
 
 class TaskException(Exception):
@@ -72,13 +70,13 @@ class Task:
         for item in departments:
             if item.NAME == self.calculation.position:
                 return item
-        raise TaskException(f'Нет подразделения с именем {self.calculation.position}.')
+        raise TaskException(f'Нет подразделения с именем {self.calculation.position}. Задачи ставяться на пользователя с ид: {DIRECTOR_ID}')
     
     async def _get_staff(self, department_id: str | int) -> list[UserSchema]:
         """Возвращает персонал подразделения"""
         staff = await requests.get_staff_from_department_id(department_id)
         if not staff:
-            raise TaskException(f'В подразделении {self.calculation.position} нет ни одного сотрудника.')
+            raise TaskException(f'В подразделении {self.calculation.position} нет ни одного сотрудника. Задачи ставяться на пользователя с ид: {DIRECTOR_ID}')
         return staff
 
     def _select_assigner(self):
@@ -87,7 +85,7 @@ class Task:
             self.assigner_id = self.department.UF_HEAD
         else:
             self.assigner_id = DIRECTOR_ID
-            self.response.message = f'В подразделении {self.calculation.position} нет руководителя, которого можно было бы назначить ответственным.'
+            self.response.message = f'В подразделении {self.calculation.position} нет руководителя. Используется постановщик по умолчанию: {DIRECTOR_ID}'
 
     def _select_performer(self):
         """
@@ -131,6 +129,7 @@ class Task:
             "TITLE": self.task_name,
             "GROUP_ID": 1,  # задачи из 1с
             "CREATED_BY": self.assigner_id,
+            "CREATED_DATE": datetime.now(MOSCOW_TIME_ZONE),
             "RESPONSIBLE_ID": self.performer.ID,
             "DESCRIPTION": self._get_task_description(),
             "DATE_START": self.performers_last_deadline,
@@ -141,7 +140,6 @@ class Task:
             "UF_TASK_WEBDAV_FILES": self.files.uploaded_files,
             "ALLOW_TIME_TRACKING": "Y",
         }
-        print(request)
         return request
 
     def _get_task_description(self) -> str:
