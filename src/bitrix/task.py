@@ -131,7 +131,7 @@ class Task:
             "TITLE": self.task_name,
             "GROUP_ID": 1,  # задачи из 1с
             "CREATED_BY": self.assigner_id,
-            "RESPONSIBLE_ID": self.performer["ID"],
+            "RESPONSIBLE_ID": self.performer.ID,
             "DESCRIPTION": self._get_task_description(),
             "DATE_START": self.performers_last_deadline,
             "DEADLINE": deadline,
