@@ -100,7 +100,7 @@ class Task:
             performer = self.staff[i]
             performer_tasks = self.staff_tasks[i]
             if not performer_tasks:
-                self.performers_last_deadline = datetime.now(UTC)
+                self.performers_last_deadline = datetime.now(MOSCOW_TIME_ZONE)
                 self.performer = performer
                 break
             for task in performer_tasks:
