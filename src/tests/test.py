@@ -1,13 +1,10 @@
-import asyncio
+import json
+import os
+
+with open('src/tests/raw_response.json', 'r', encoding='utf-8') as file:
+    data = json.load(file)
 
 
-async def main():
-    d = {}
-    for i in range(5):
-        task = asyncio.create_task(asyncio.sleep(i))
-        d[i] = task
-    await asyncio.gather(*d.values())
-    print(d)
+with open('src/tests/')
 
-
-asyncio.run(main())
+print(data)

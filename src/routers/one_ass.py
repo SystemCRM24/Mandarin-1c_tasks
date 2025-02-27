@@ -14,9 +14,9 @@ async def create_tasks(order: OrderSchema):
     """Создание задач"""
     asyncio.create_task(utils.log_schema(order))
     try:
-        file_uploader = bitrix.FileUploader(order.attached_files)
+        file_uploader = bitrix.file.FileUploader(order.attached_files)
         asyncio.create_task(file_uploader.upload())
-        coros = (bitrix.Task(order, c, file_uploader).put() for c in order.calculation)
+        coros = (bitrix.task.Task(order, c, file_uploader).put() for c in order.calculation)
         return await asyncio.gather(*coros)
     except Exception as e:
         asyncio.create_task(utils.debug_log(e))

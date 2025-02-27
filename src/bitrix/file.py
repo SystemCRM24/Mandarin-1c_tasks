@@ -1,4 +1,5 @@
 import asyncio
+from urllib.parse import unquote
 
 from src.bitrix.requests import upload_file
 from src.schemas.one_ass import AttachedFilesItem
@@ -16,8 +17,11 @@ class FileUploader:
         """Загружает файлы на сервер"""
         self._upload_event.clear()
         if self.files_to_upload:
-            tasks = (upload_file(i.name, i.binary) for i in self.files_to_upload)
-            response = await asyncio.gather(*tasks)
+            coros = []
+            for file in self.files_to_upload:
+                b64_message = unquote(file.binary)
+                coros.append(upload_file(file.name, b64_message))
+            response = await asyncio.gather(*coros)
             for file in response:
                 self.uploaded_files.append("n" + str(file["ID"]))
         self._upload_event.set()
