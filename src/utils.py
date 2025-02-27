@@ -13,7 +13,7 @@ separator = '---------- {0} ----------'
 async def debug_log(e: Exception):
     """Логирование ошибок. Передаём ошибку и дополнительную информацию"""
     debug_logger.info(separator.format(datetime.now()))
-    debug_logger.exception(str(e), e)
+    debug_logger.exception(e)
 
 
 async def log_schema(schema: BaseModel):
