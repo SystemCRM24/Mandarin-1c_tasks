@@ -89,27 +89,28 @@ class Task:
 
     def _select_performer(self):
         """
-        Определяет человека, которому будет поставлена задача
-        и время последней задачи, по которой будет производиться подсчет
+        Определяет человека, которому будет поставлена задача и 
+        время последней задачи, по которой будет производиться подсчет.
         Возвращает обработчик, который будет ставить новую или обновлять старую задачу.
         Все в куче в одной функции, но зато одним циклом.
         """
+        now = datetime.now(MOSCOW_TIME_ZONE)
         for i in range(len(self.staff)):
             performer = self.staff[i]
             performer_tasks = self.staff_tasks[i]
             if not performer_tasks:
-                self.performers_last_deadline = datetime.now(MOSCOW_TIME_ZONE)
                 self.performer = performer
                 break
             for task in performer_tasks:
                 if task.title == self.task_name:  # В случае обновления задачи
-                    self.performers_last_deadline = task.dateStart
                     self.performer = performer
+                    self.performers_last_deadline = task.dateStart
                     return self._update_task_wrapper(task.id)
-                current_deadline = task.deadline
-                if self.performers_last_deadline is None or current_deadline < self.performers_last_deadline:
-                    self.performers_last_deadline = current_deadline
+                if self.performers_last_deadline is None or task.deadline < self.performers_last_deadline:
                     self.performer = self.staff[i]
+                    self.performers_last_deadline = task.deadline
+        if self.performers_last_deadline is None or now > self.performers_last_deadline:
+            self.performers_last_deadline = now
         return requests.create_task
 
     @staticmethod
