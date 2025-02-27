@@ -18,5 +18,5 @@ async def create_tasks(order: OrderSchema):
         coros = (bitrix.task.Task(order, c, file_uploader).put() for c in order.calculation)
         return await asyncio.gather(*coros)
     except Exception as e:
-        asyncio.create_task(utils.debug_log(e))
+        asyncio.create_task(utils.log_exception(e))
         raise exceptions.HTTPException(status_code=500, detail=str(e))

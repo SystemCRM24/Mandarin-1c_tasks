@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime
 from pydantic import BaseModel
+import traceback
 
 
 debug_logger = logging.getLogger("debug_logger")
@@ -10,10 +11,11 @@ debug_logger.handlers = [logging.FileHandler("logs/debug.log", encoding="utf-8")
 separator = '---------- {0} ----------'
 
 
-async def debug_log(e: Exception):
+async def log_exception(e: Exception):
     """Логирование ошибок. Передаём ошибку и дополнительную информацию"""
     debug_logger.info(separator.format(datetime.now()))
-    debug_logger.exception(e.with_traceback())
+    debug_logger.info(e)
+    debug_logger.info(traceback.format_exc())
 
 
 async def log_schema(schema: BaseModel):

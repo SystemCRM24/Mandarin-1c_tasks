@@ -1,10 +1,11 @@
-import json
-import os
+import traceback
 
-with open('src/tests/raw_response.json', 'r', encoding='utf-8') as file:
-    data = json.load(file)
+def some_func():
+    raise ValueError('UUUUU SUCA')
 
 
-with open('src/tests/')
-
-print(data)
+try:
+    a = some_func()
+except Exception as e:
+    print(e)
+    print(traceback.format_exc())
