@@ -127,7 +127,7 @@ class Task:
     def _get_request(self) -> dict:
         """Формирует ответ для постановки или обновления задачи. Записываем под формат битрикса"""
         deadline = self._get_deadline_date()
-        return {
+        request =  {
             "TITLE": self.task_name,
             "GROUP_ID": 1,  # задачи из 1с
             "CREATED_BY": self.assigner_id,
@@ -141,6 +141,8 @@ class Task:
             "UF_TASK_WEBDAV_FILES": self.files.uploaded_files,
             "ALLOW_TIME_TRACKING": "Y",
         }
+        print(request)
+        return request
 
     def _get_task_description(self) -> str:
         """Возвращает описание задачи"""
