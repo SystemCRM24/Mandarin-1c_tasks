@@ -12,6 +12,7 @@ from . import requests
 
 DIRECTOR_ID = environ.get('DIRECTOR_ID')
 MOSCOW_TIME_ZONE = ZoneInfo('Europe/Moscow')
+CORRECTION = timedelta(hours=3)
 
 
 class TaskException(Exception):
@@ -126,22 +127,23 @@ class Task:
     def _get_request(self) -> dict:
         """Формирует ответ для постановки или обновления задачи. Записываем под формат битрикса"""
         deadline = self._get_deadline_date()
+        scum = True
+        now = datetime.now(MOSCOW_TIME_ZONE)
         request =  {
             "TITLE": self.task_name,
             "GROUP_ID": 1,  # задачи из 1с
             "CREATED_BY": self.assigner_id,
-            "CREATED_DATE": datetime.now(MOSCOW_TIME_ZONE),
+            "CREATED_DATE": (now + CORRECTION) if scum else now,
             "RESPONSIBLE_ID": self.performer.ID,
             "DESCRIPTION": self._get_task_description(),
-            "DATE_START": self.performers_last_deadline,
-            "DEADLINE": deadline,
-            "START_DATE_PLAN": self.performers_last_deadline,
-            "END_DATE_PLAN": deadline,
+            "DATE_START": (self.performers_last_deadline + CORRECTION) if scum else self.performers_last_deadline,
+            "DEADLINE": (deadline + CORRECTION) if scum else deadline,
+            "START_DATE_PLAN": (self.performers_last_deadline + CORRECTION) if scum else self.performers_last_deadline,
+            "END_DATE_PLAN": (deadline + CORRECTION) if scum else deadline,
             "TIME_ESTIMATE": self.calculation.time,
             "UF_TASK_WEBDAV_FILES": self.files.uploaded_files,
             "ALLOW_TIME_TRACKING": "Y",
         }
-        print(request)
         return request
 
     def _get_task_description(self) -> str:
