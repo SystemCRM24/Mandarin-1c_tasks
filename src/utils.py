@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 
 debug_logger = logging.getLogger("debug_logger")
-debug_logger.setLevel(logging.INFO)
+debug_logger.setLevel(logging.DEBUG)
 debug_logger.handlers = [logging.FileHandler("logs/debug.log", encoding="utf-8")]
 
 separator = '---------- {0} ----------'
@@ -13,7 +13,7 @@ separator = '---------- {0} ----------'
 async def debug_log(e: Exception):
     """Логирование ошибок. Передаём ошибку и дополнительную информацию"""
     debug_logger.info(separator.format(datetime.now()))
-    debug_logger.exception(e, stack_info=True)
+    debug_logger.exception(e.with_traceback())
 
 
 async def log_schema(schema: BaseModel):
