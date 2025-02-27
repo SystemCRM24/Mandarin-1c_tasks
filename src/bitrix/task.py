@@ -68,7 +68,7 @@ class Task:
     
     async def _get_department(self) -> DepartmentSchema:
         """Получает подразделение для объекта"""
-        departments: list[DepartmentSchema] = requests.get_departments_info(self.calculation.position)
+        departments: list[DepartmentSchema] = await requests.get_departments_info(self.calculation.position)
         for item in departments:
             if item.NAME == self.calculation.position:
                 return item

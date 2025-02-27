@@ -15,7 +15,7 @@ async def log_exception(e: Exception):
     """Логирование ошибок. Передаём ошибку и дополнительную информацию"""
     debug_logger.info(separator.format(datetime.now()))
     for frame in traceback.format_exception(e):
-        debug_logger.info(frame)
+        debug_logger.info(frame[:-1])
 
 
 async def log_schema(schema: BaseModel):
