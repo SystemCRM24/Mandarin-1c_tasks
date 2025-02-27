@@ -104,11 +104,11 @@ class Task:
                 self.performer = performer
                 break
             for task in performer_tasks:
-                if task["title"] == self.task_name:  # В случае обновления задачи
-                    self.performers_last_deadline = datetime.fromisoformat(task["dateStart"])
+                if task.title == self.task_name:  # В случае обновления задачи
+                    self.performers_last_deadline = datetime.fromisoformat(task.dateStart)
                     self.performer = performer
-                    return self._update_task_wrapper(task["id"])
-                current_deadline = datetime.fromisoformat(task["deadline"])
+                    return self._update_task_wrapper(task.id)
+                current_deadline = datetime.fromisoformat(task.deadline)
                 if self.performers_last_deadline is None or current_deadline < self.performers_last_deadline:
                     self.performers_last_deadline = current_deadline
                     self.performer = self.staff[i]
