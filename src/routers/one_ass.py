@@ -3,7 +3,9 @@ import asyncio
 from fastapi import APIRouter, exceptions
 
 from src.schemas.one_ass import OrderSchema
-from src import bitrix, utils
+from src.bitrix.file import FileUploader
+from src.bitrix.task import Task
+from src import utils
 
 
 router = APIRouter(tags=['1c'])
@@ -13,9 +15,9 @@ router = APIRouter(tags=['1c'])
 async def create_tasks(order: OrderSchema):
     """Создание задач"""
     try:
-        file_uploader = bitrix.file.FileUploader(order.attached_files)
+        file_uploader = FileUploader(order.attached_files)
         asyncio.create_task(file_uploader.upload())
-        coros = (bitrix.task.Task(order, c, file_uploader).put() for c in order.calculation)
+        coros = (Task(order, c, file_uploader).put() for c in order.calculation)
         return await asyncio.gather(*coros)
     except Exception as e:
         asyncio.create_task(utils.log_exception(e))
