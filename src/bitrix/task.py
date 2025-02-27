@@ -99,7 +99,6 @@ class Task:
         for i in range(len(self.staff)):
             performer = self.staff[i]
             performer_tasks = self.staff_tasks[i]
-            print(performer, performer_tasks)
             if not performer_tasks:
                 self.performer = performer
                 break

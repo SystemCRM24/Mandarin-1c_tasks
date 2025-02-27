@@ -2,6 +2,7 @@
 import asyncio
 from fastapi import APIRouter, exceptions
 
+from .front import UPDATE_EVENT
 from src.schemas.one_ass import OrderSchema
 from src.bitrix.file import FileUploader
 from src.bitrix.task import Task
@@ -21,6 +22,7 @@ async def create_tasks(order: OrderSchema):
         result = await asyncio.gather(*coros)
         asyncio.create_task(utils.log_schema(order))
         asyncio.create_task(utils.log_create_task_response(result))
+        UPDATE_EVENT.set()
         return result
     except Exception as e:
         asyncio.create_task(utils.log_exception(e))
