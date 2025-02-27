@@ -1,23 +1,21 @@
-import asyncio
+from os import environ
+
+# Проверка на виртуальное окружение
+if environ.get('BITRIX_WEBHOOK') is None:
+    import dotenv
+    dotenv.load_dotenv()
+
 
 from fastapi import FastAPI
-from fastapi.exceptions import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-
-from src.bitrix.file import FileUploader
-from src.bitrix.task import Task, UpdateTaskException
-from src.bitrix import requests
-
-from src.schemas import OrderSchema, UpdateTaskSchema
-from src.utils import log_error
-from src.service import fetch_websocket_data
-from src.websocket import ws_router, UPDATE_EVENT
+from src import routers
 
 
 app = FastAPI(
     title="Постановка задач",
     description="Автоматическая постановка задач для Битрикс24 компании Мандарин на основе POST-запроса.",
 )
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -27,53 +25,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(ws_router)
 
-
-@app.get("/ping", status_code=200, tags=['1c'])
-async def ping():
-    """Пингует сервер"""
-    return {"message": "Pong"}
-
-
-@app.post("/create_task", status_code=200, tags=['1c'])
-async def create_tasks(order: OrderSchema):
-    """Создание задач"""
-    # try:
-    async with asyncio.TaskGroup() as tg:
-        file_handler = FileUploader(order.attached_files)
-        tg.create_task(file_handler.upload())
-        for calculation in order.calculation:
-            bx_task = Task(order, calculation, file_handler)
-            tg.create_task(bx_task.put_task())
-    return {"message": "ok"}
-    # except Exception as e:
-    #     asyncio.create_task(log_error(e))
-    #     if isinstance(e, UpdateTaskException):
-    #         return {"message": "Ошибка при обновлении задачи. Некоторые данные могли не сохраниться."}
-    #     raise HTTPException(500, detail=str(e))
-    
-
-@app.get("/fetch_data", tags=['Front'])
-async def fetch_data():
-    """Тестирование корректности отправляемых данных"""
-    return await fetch_websocket_data()
-
-
-@app.get('/trigger_event', tags=['Front'])
-async def trigger_event():
-    """Тригеррит эвент на обновление вебсокетов"""
-    UPDATE_EVENT.set()
-    return {'message': 'Event triggered'}
-
-
-@app.patch('/update_task/{task_id}', tags=['Front'])
-async def update_task(task_id: int, data: UpdateTaskSchema):
-    """Обновление задачи"""
-    try:
-        await requests.update_task(task_id, data.model_dump())
-        msg = {"message": "ok"}
-    except:
-        msg = {"message": "Ошибка при обновлении задачи. Некоторые данные могли не сохраниться."}
-    UPDATE_EVENT.set()
-    return msg
+app.include_router(routers.front_router)
+app.include_router(routers.one_ass_router)
+app.include_router(routers.tests_router)

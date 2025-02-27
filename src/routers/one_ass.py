@@ -1,0 +1,23 @@
+"""Роутер для работы с 1с"""
+import asyncio
+from fastapi import APIRouter, exceptions
+
+from src.schemas.one_ass import OrderSchema
+from src import bitrix, utils
+
+
+router = APIRouter(tags=['1c'])
+
+
+@router.post("/create_task", status_code=200)
+async def create_tasks(order: OrderSchema):
+    """Создание задач"""
+    asyncio.create_task(utils.log_schema(order))
+    try:
+        file_uploader = bitrix.FileUploader(order.attached_files)
+        asyncio.create_task(file_uploader.upload())
+        coros = (bitrix.Task(order, c, file_uploader).put() for c in order.calculation)
+        return await asyncio.gather(*coros)
+    except Exception as e:
+        asyncio.create_task(utils.debug_log(e))
+        raise exceptions.HTTPException(status_code=500, detail=str(e))

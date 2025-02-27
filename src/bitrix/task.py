@@ -1,8 +1,9 @@
 import asyncio
-import math
+from os import environ
 from datetime import datetime, timezone, timedelta
 
-from src.schemas import OrderSchema, CalculationItem
+from src.schemas.one_ass import OrderSchema, CalculationItem
+from src.schemas.main import TaskResponseSchema, DepartmentSchema, UserSchema
 from .schedule import BXSchedule
 from .file import FileUploader
 from . import requests
@@ -12,58 +13,81 @@ CORRECTION = timedelta(hours=3)
 MOSCOW_TIME_ZONE = timezone(CORRECTION, "ETC")
 UTC = timezone(timedelta(hours=0), "utc")
 
+DIRECTOR_ID = environ.get('DIRECTOR_ID')
 
-class UpdateTaskException(Exception):
-    """Исключение при обновлении задачи"""
+
+class TaskException(Exception):
+    pass
 
 
 class Task:
     """Класс - интерфейс для работы с задачами"""
 
     def __init__(self, order: OrderSchema, calculation: CalculationItem, files: FileUploader):
+        # Сохраняем в объекте съемы
         self.order = order
         self.calculation = calculation
         self.files = files
         # Технические переменные
+        self.department: DepartmentSchema = None
         self.staff: list = None
         self.staff_tasks: list = None
         self.staff_calendar = BXSchedule()
         # Переменные для запроса
-        self.task_name: str = None
-        self.assigner_id: int = 1
-        self.performer: dict = None
+        self.task_name = f"{self.calculation.position}: {self.order.number}"
+        self.assigner_id: int = None
+        self.performer: UserSchema = None
         self.performers_last_deadline: datetime = None
+        # Переменная для ответа
+        self.response = TaskResponseSchema(position=calculation.position)
 
-    async def put_task(self):
+    async def put(self):
         """Ставит задачу"""
-        self._preprocessing()
-        print('start put')
         await asyncio.gather(
-            self.files.upload_event.wait(),
+            self.files._upload_event.wait(),
             self.staff_calendar.update_from_bxschedule(),
             self._update_staff_info(),
-            self._select_assigner(),
         )
-        print('end put')
+        self._select_assigner()
         handler = self._select_performer()
         await handler(self._get_request())
-
-    def _preprocessing(self):
-        """Различная подготовка объекта перед выполнением запросов"""
-        # Формируем название заказа
-        self.task_name = f"{self.calculation.position}: {self.order.number}"
-        # Округляем время в потолок. Переводим в секунды
-        self.calculation.time = math.ceil(self.calculation.time * 60)
+        self.response.user = self.performer.full_name
+        self.response.user_id = self.performer.ID
+        return self.response
 
     async def _update_staff_info(self):
         """Обновляет информацию по подразделению и сотрудникам"""
-        department_id = await requests.get_department_id_from_name(self.calculation.position)
-        self.staff = await requests.get_staff_from_department_id(department_id)
-        self.staff_tasks = await requests.get_staff_tasks(self.staff)
+        try:
+            self.department = await self._get_department()
+            self.staff = await self._get_staff(self.department.ID)
+            self.staff_tasks = await requests.get_staff_tasks(self.staff)
+        except TaskException:
+            self.response.message = str(TaskException)
+            self.staff = [await requests.get_user_from_id(DIRECTOR_ID)]
+            self.staff_tasks = []
+    
+    async def _get_department(self) -> DepartmentSchema:
+        """Получает подразделение для объекта"""
+        departments: list[DepartmentSchema] = requests.get_departments_info(self.calculation.position)
+        for item in departments:
+            if item.NAME == self.calculation.position:
+                return item
+        raise TaskException(f'Нет подразделения с именем {self.calculation.position}.')
+    
+    async def _get_staff(self, department_id: str | int) -> list[UserSchema]:
+        """Возвращает персонал подразделения"""
+        staff = await requests.get_staff_from_department_id(department_id)
+        if not staff:
+            raise TaskException(f'В подразделении {self.calculation.position} нет ни одного сотрудника.')
+        return staff
 
-    async def _select_assigner(self):
+    def _select_assigner(self):
         """Устанавливает постановщика задачи"""
-        self.assigner_id = await requests.get_department_head_from_name(self.order.executor)
+        if self.department is not None and self.department.UF_HEAD is not None:
+            self.assigner_id = self.department.UF_HEAD
+        else:
+            self.assigner_id = DIRECTOR_ID
+            self.response.message = f'В подразделении {self.calculation.position} нет руководителя, которого можно было бы назначить ответственным.'
 
     def _select_performer(self):
         """
@@ -73,16 +97,16 @@ class Task:
         Все в куче в одной функции, но зато одним циклом.
         """
         for i in range(len(self.staff)):
-            victim = self.staff[i]
-            victim_tasks = self.staff_tasks[i]
-            if not victim_tasks:
+            performer = self.staff[i]
+            performer_tasks = self.staff_tasks[i]
+            if not performer_tasks:
                 self.performers_last_deadline = datetime.now(UTC)
-                self.performer = victim
+                self.performer = performer
                 break
-            for task in victim_tasks:
+            for task in performer_tasks:
                 if task["title"] == self.task_name:  # В случае обновления задачи
                     self.performers_last_deadline = datetime.fromisoformat(task["dateStart"])
-                    self.performer = victim
+                    self.performer = performer
                     return self._update_task_wrapper(task["id"])
                 current_deadline = datetime.fromisoformat(task["deadline"])
                 if self.performers_last_deadline is None or current_deadline < self.performers_last_deadline:
@@ -97,7 +121,7 @@ class Task:
             try:
                 await requests.update_task(task_id, request_data)
             except:
-                raise UpdateTaskException("Ошибка обновления задачи")
+                raise TaskException("Ошибка обновления задачи")
         return wrapper
 
     def _get_request(self) -> dict:
