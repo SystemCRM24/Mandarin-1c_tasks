@@ -2,7 +2,6 @@ import logging
 from datetime import datetime
 from pydantic import BaseModel
 import traceback
-import json
 
 
 debug_logger = logging.getLogger("debug_logger")
@@ -24,10 +23,11 @@ async def log_exception(e: Exception):
         debug_logger.info(frame[:-1])
 
 
-async def log_create_task_response(obj):
+async def log_create_task_response(obj: list[BaseModel]):
     """Логгирует ответ от приложения на создание задачи"""
     ct_logger.info(separator.format(datetime.now().strftime(r'%Y-%m-%d_%H-%M-%S-%f')))
-    ct_logger.info(json.dumps(obj, indent=4))
+    for model in obj:
+        ct_logger.info(model.model_dump_json(indent=4))
 
 
 async def log_schema(schema: BaseModel):
