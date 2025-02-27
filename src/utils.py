@@ -14,8 +14,7 @@ separator = '---------- {0} ----------'
 async def log_exception(e: Exception):
     """Логирование ошибок. Передаём ошибку и дополнительную информацию"""
     debug_logger.info(separator.format(datetime.now()))
-    debug_logger.info(e)
-    for frame in traceback.extract_tb(e.__traceback__):
+    for frame in traceback.format_exception(e):
         debug_logger.info(frame)
 
 

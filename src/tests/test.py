@@ -8,4 +8,4 @@ try:
     a = some_func()
 except Exception as e:
     print(e)
-    print(traceback.format_exc())
+    print(traceback.format_exception(e))
