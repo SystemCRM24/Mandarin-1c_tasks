@@ -2,6 +2,7 @@
 from pydantic import BaseModel
 from datetime import datetime
 from .main import DepartmentSchema, UserSchema, TaskSchema
+from typing import Dict
 
 
 class UpdateTaskSchema(BaseModel):
@@ -21,8 +22,8 @@ class IntervalSchema(BaseModel):
 
 class WebSocketSchema(BaseModel):
     """Схема ответа по вс соединению"""
-    departments: dict[str: DepartmentSchema]
-    staff: dict[str: UserSchema]
-    tasks: dict[str: TaskSchema]
+    departments: Dict[str, DepartmentSchema]
+    staff: Dict[str, UserSchema]
+    tasks: Dict[str, TaskSchema]
     interval: IntervalSchema
     workIntervals: list[IntervalSchema]
