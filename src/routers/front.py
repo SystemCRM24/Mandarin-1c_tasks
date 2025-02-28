@@ -19,7 +19,7 @@ async def update_event_handler():
         await UPDATE_EVENT.wait()
         UPDATE_EVENT.clear()
         data = await fetch_websocket_data()
-        tasks = [ws.send_json(data) for ws in CONNECTIONS]
+        tasks = (ws.send_text(data.model_dump_json()) for ws in CONNECTIONS)
         await asyncio.gather(*tasks, return_exceptions=True)
 
 asyncio.create_task(update_event_handler())
