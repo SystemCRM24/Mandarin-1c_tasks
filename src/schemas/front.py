@@ -1,5 +1,7 @@
 """Схемы для работы с данными для фронт-части приложения"""
 from pydantic import BaseModel
+from datetime import datetime
+from .main import DepartmentSchema, UserSchema, TaskSchema
 
 
 class UpdateTaskSchema(BaseModel):
@@ -11,15 +13,16 @@ class UpdateTaskSchema(BaseModel):
     TIME_ESTIMATE: int
 
 
+class IntervalSchema(BaseModel):
+    """Схема Временного промежутка"""
+    start: datetime
+    end: datetime
 
-# class WorkIntervalSchema(BaseModel):
-#     start: datetime
-#     end: datetime
 
-
-# class ResultSchema(BaseModel):
-#     departments: dict[str, DepartmentSchema]
-#     staff: dict[str, StaffSchema]
-#     tasks: dict[str, TaskSchema]
-#     interval: dict[str, str] | list[dict]
-#     workIntervals: List[WorkIntervalSchema] | None = None
+class WebSocketSchema(BaseModel):
+    """Схема ответа по вс соединению"""
+    departments: dict[str: DepartmentSchema]
+    staff: dict[str: UserSchema]
+    tasks: dict[str: TaskSchema]
+    interval: IntervalSchema
+    workIntervals: list[IntervalSchema]

@@ -51,7 +51,6 @@ class TaskSchema(BaseModel):
         return value.replace(tzinfo=ZoneInfo('Europe/Moscow'))
 
 
-
 class TaskResponseSchema(BaseModel):
     """Схема ответа по постановке/обновлении задачи"""
     position: str
