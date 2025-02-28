@@ -1,5 +1,7 @@
-from .bitrix import requests, schedule
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+
+from .bitrix import requests, schedule
 from .schemas.front import IntervalSchema, WebSocketSchema
 
 
@@ -15,7 +17,8 @@ async def fetch_websocket_data() -> WebSocketSchema:
         staff=staff,
         tasks=tasks,
         interval=interval,
-        workIntervals=work_intervals
+        workIntervals=work_intervals,
+        now=datetime.now(ZoneInfo('Europe/Moscow'))
     )
 
 async def get_departments() -> dict:

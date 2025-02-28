@@ -27,3 +27,4 @@ class WebSocketSchema(BaseModel):
     tasks: Dict[str, TaskSchema]
     interval: IntervalSchema
     workIntervals: list[IntervalSchema]
+    now: datetime
