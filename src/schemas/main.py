@@ -19,7 +19,6 @@ class UserSchema(BaseModel):
     LAST_NAME: str
     UF_DEPARTMENT: list[int] = []
 
-    @computed_field
     @property
     def full_name(self) -> str:
         return self.NAME + ' ' + self.LAST_NAME 
