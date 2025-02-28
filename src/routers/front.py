@@ -46,7 +46,7 @@ async def handle_connection(websocket: WebSocket):
     try:
         while True:
             data = await fetch_websocket_data()
-            await websocket.send_json(data)
+            await websocket.send_json(data.model_dump_json())
             await websocket.receive_text()
     except WebSocketDisconnect:
         CONNECTIONS.discard(websocket)

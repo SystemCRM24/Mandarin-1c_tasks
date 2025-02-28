@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from .schemas.front import IntervalSchema, WebSocketSchema
 
 
-async def fetch_websocket_data() -> dict:
+async def fetch_websocket_data() -> WebSocketSchema:
     """Получает данные для отправки по websocket-соединению"""
     departments = await get_departments()
     staff = await get_staff(departments)
