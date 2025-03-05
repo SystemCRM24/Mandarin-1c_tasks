@@ -2,12 +2,12 @@
 import asyncio
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
-from src.service import fetch_websocket_data
-from src.schemas.front import UpdateTaskSchema
-from src.bitrix import requests
+from api.v1.service import fetch_websocket_data
+from api.v1.schemas.front import UpdateTaskSchema
+from api.v1.bitrix import requests
 
 
-router = APIRouter(tags=['front'])
+router = APIRouter()
 
 CONNECTIONS: set[WebSocket] = set()
 UPDATE_EVENT = asyncio.Event()

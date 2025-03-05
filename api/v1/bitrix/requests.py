@@ -2,7 +2,7 @@ import aiocache
 from os import environ
 
 from fast_bitrix24 import BitrixAsync
-from src.schemas.main import DepartmentSchema, UserSchema, TaskSchema
+from api.v1.schemas.main import DepartmentSchema, UserSchema, TaskSchema
 
 
 BITRIX_WEBHOOK = environ.get('BITRIX_WEBHOOK')

@@ -8,7 +8,7 @@ if environ.get('BITRIX_WEBHOOK') is None:
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from src import routers
+from api.v1.routers.main import router as v1_router
 
 
 app = FastAPI(
@@ -26,6 +26,4 @@ app.add_middleware(
 )
 
 
-app.include_router(routers.front_router)
-app.include_router(routers.one_ass_router)
-app.include_router(routers.tests_router)
+app.include_router(v1_router)

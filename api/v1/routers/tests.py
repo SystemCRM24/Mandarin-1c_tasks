@@ -1,10 +1,10 @@
 """Тестовые роутеры"""
 from fastapi import APIRouter
-from src.service import fetch_websocket_data
+from api.v1.service import fetch_websocket_data
 from .front import UPDATE_EVENT
 
 
-router = APIRouter(tags=['test'])
+router = APIRouter()
 
 
 @router.get("/ping", status_code=200)

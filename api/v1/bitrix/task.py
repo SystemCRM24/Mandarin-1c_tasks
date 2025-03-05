@@ -3,8 +3,8 @@ from os import environ
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
-from src.schemas.one_ass import OrderSchema, CalculationItem
-from src.schemas.main import TaskResponseSchema, DepartmentSchema, UserSchema
+from api.v1.schemas.one_ass import OrderSchema, CalculationItem
+from api.v1.schemas.main import TaskResponseSchema, DepartmentSchema, UserSchema
 from .schedule import BXSchedule
 from .file import FileUploader
 from . import requests
@@ -108,7 +108,7 @@ class Task:
                     self.performers_last_deadline = task.dateStart
                     return self._update_task_wrapper(task.id)
                 if self.performers_last_deadline is None or task.deadline > self.performers_last_deadline:
-                    self.performer = self.staff[i]
+                    self.performer = performer
                     self.performers_last_deadline = task.deadline
         if self.performers_last_deadline is None or now > self.performers_last_deadline:
             self.performers_last_deadline = now

@@ -3,13 +3,13 @@ import asyncio
 from fastapi import APIRouter, exceptions
 
 from .front import UPDATE_EVENT
-from src.schemas.one_ass import OrderSchema
-from src.bitrix.file import FileUploader
-from src.bitrix.task import Task
-from src import utils
+from api.v1.schemas.one_ass import OrderSchema
+from api.v1.bitrix.file import FileUploader
+from api.v1.bitrix.task import Task
+from api.v1 import utils
 
 
-router = APIRouter(tags=['1c'])
+router = APIRouter()
 
 
 @router.post("/create_task", status_code=200)

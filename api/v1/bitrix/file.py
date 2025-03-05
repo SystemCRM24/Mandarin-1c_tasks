@@ -1,8 +1,8 @@
 import asyncio
 from urllib.parse import unquote
 
-from src.bitrix.requests import upload_file
-from src.schemas.one_ass import AttachedFilesItem
+from api.v1.bitrix.requests import upload_file
+from api.v1.schemas.one_ass import AttachedFilesItem
 
 
 class FileUploader:

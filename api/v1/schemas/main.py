@@ -1,5 +1,5 @@
 """Внутренние схемы приложения"""
-from pydantic import BaseModel, computed_field, field_validator
+from pydantic import BaseModel, field_validator
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
