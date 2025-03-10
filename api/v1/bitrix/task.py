@@ -148,10 +148,10 @@ class Task:
 
     def _get_task_description(self) -> str:
         """Возвращает описание задачи"""
-        string = (
+        string = "\n".join((
             f"Сумма: {self.calculation.amount}", 
-            f"Рекомендуемая дата сдачи: {self.order.completion_date}"
-        )
+            f"Рекомендуемая дата сдачи: {self.order.deadline}"
+        ))
         return "\n".join(string)
 
     def _get_deadline_date(self) -> datetime:

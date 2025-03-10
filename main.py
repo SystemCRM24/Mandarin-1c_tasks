@@ -27,5 +27,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-for r in (v1_router, v2_router):
-    app.include_router(r)
+
+app.include_router(v1_router)
+app.include_router(v2_router)
