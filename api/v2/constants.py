@@ -1,6 +1,8 @@
 from os import environ
 from zoneinfo import ZoneInfo
 from aiocache import Cache
+import asyncio
+
 
 # Проверка на виртуальное окружение
 if environ.get('BITRIX_WEBHOOK') is None:
@@ -17,3 +19,5 @@ TIMEZONE_COMPENSATION = environ.get('TIMEZONE_COMPENSATION')
 # Остальное
 MOSCOW_TZ = ZoneInfo('Europe/Moscow')
 CACHE = Cache.MEMORY
+EVENT = asyncio.Event()     # Отслеживание изменений для фронта
+QUEUE = asyncio.Queue()     # Очередь для работы с событиями из битрикса.
