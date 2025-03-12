@@ -25,4 +25,4 @@ class Uploader:
     async def _upload_file(file_item: FileItemSchema):
         """Основная логика загрузки"""
         response = await upload_file(file_item.name, file_item.binary)
-        file_item.bx_id = f'n{response["ID"]}'
+        file_item.bx_id = response["ID"]

@@ -5,6 +5,12 @@ from fast_bitrix24 import BitrixAsync
 from api.v1.schemas.main import DepartmentSchema, UserSchema, TaskSchema
 
 
+# Проверка на виртуальное окружение
+if environ.get('BITRIX_WEBHOOK') is None:
+    import dotenv
+    dotenv.load_dotenv()
+
+
 BITRIX_WEBHOOK = environ.get('BITRIX_WEBHOOK')
 BX = BitrixAsync(BITRIX_WEBHOOK)
 

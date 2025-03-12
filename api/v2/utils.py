@@ -1,7 +1,8 @@
 import logging
 from datetime import datetime
-from .constants import MOSCOW_TIME_ZONE
 import traceback
+
+from .constants import MOSCOW_TZ
 
 
 debug_logger = logging.getLogger("debug_logger")
@@ -13,6 +14,6 @@ separator = '---------- {0} ----------'
 
 async def log_exception(e: Exception):
     """Логирование ошибок. Передаём ошибку и дополнительную информацию"""
-    debug_logger.info(separator.format(datetime.now(tz=MOSCOW_TIME_ZONE)))
+    debug_logger.info(separator.format(datetime.now(tz=MOSCOW_TZ)))
     for frame in traceback.format_exception(e):
         debug_logger.info(frame[:-1])

@@ -2,7 +2,7 @@ from datetime import datetime
 import logging
 import asyncio
 from .file import Uploader
-from .task import TaskHandler
+from .handler import TaskHandler
 from ..schemas.onec import OrderSchema, ResponseItemSchema
 
 
@@ -17,7 +17,7 @@ def create_tasks_coros(order: OrderSchema, uploader: Uploader):
     """Генератор который возвращает корутины для постановки задач"""
     for calculation in order.calculation:
         handler = TaskHandler(order, calculation, uploader)
-        yield handler.put()
+        yield handler.handle()
 
  
 async def log_request(filename: str, order: OrderSchema, uploader: Uploader):

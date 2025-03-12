@@ -9,12 +9,15 @@ class CalculationItemSchema(BaseModel):
     position_id: str = Field(alias="ДолжностьИдентификатор")
     time: int = Field(
         alias="Время", 
-        description="Время в минутах которое предполагается затратить на производство задачи"
+        description="Время в секундах которое предполагается затратить на производство задачи"
     )
     amount: float = Field(alias="Сумма")
 
     @field_validator('time', mode='before')
     @classmethod
-    def validate_time(cls, value: float) -> int:
-        """Округляет время в потолок до кратного 5 минутам"""
-        return ceil(value * 60 / 300) * 300
+    def validate_time(cls, minutes: float) -> int:
+        """
+        На вход подается время в минутах.
+        Округляем вверх до кратного 5 минутам и возвращает в виде секунд.
+        """
+        return ceil(minutes / 5) * 5 * 60

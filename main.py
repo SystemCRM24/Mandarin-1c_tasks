@@ -1,11 +1,3 @@
-from os import environ
-
-# Проверка на виртуальное окружение
-if environ.get('BITRIX_WEBHOOK') is None:
-    import dotenv
-    dotenv.load_dotenv()
-
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 

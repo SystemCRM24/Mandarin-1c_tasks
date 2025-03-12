@@ -2,7 +2,8 @@
 from pydantic import BaseModel, Field, field_validator
 from typing import List
 from datetime import datetime
-from api.v2.constants import MOSCOW_TIME_ZONE
+from ...constants import MOSCOW_TZ
+
 
 from .calculation_schema import CalculationItemSchema
 from .file_item_schema import FileItemSchema
@@ -38,5 +39,5 @@ class OrderSchema(BaseModel):
         # Все даты приходят в формате ISO, но без указания часового пояса. 
         # Соответственно, строка 2025-02-13T17:36:20 означает, что это 17:36 по Москве.
         if value.tzinfo is None:
-            return value.replace(tzinfo=MOSCOW_TIME_ZONE)
+            return value.replace(tzinfo=MOSCOW_TZ)
         return value
