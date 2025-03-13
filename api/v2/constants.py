@@ -18,6 +18,6 @@ TIMEZONE_COMPENSATION = environ.get('TIMEZONE_COMPENSATION')
 
 # Остальное
 MOSCOW_TZ = ZoneInfo('Europe/Moscow')
-CACHE = Cache.MEMORY
+CACHE = Cache()
 EVENT = asyncio.Event()     # Отслеживание изменений для фронта
 QUEUE = asyncio.Queue()     # Очередь для работы с событиями из битрикса.

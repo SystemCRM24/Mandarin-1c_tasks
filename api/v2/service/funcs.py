@@ -1,11 +1,12 @@
 import aiocache
 import asyncio
-from api.v2.constants import CACHE
 from api.v2.bitrix import get_task_info, get_user_tasks
 from api.v2.bxtask import BXTask
 
 
-@aiocache.cached(ttl=60 * 60 * 4, namespace='tasks', cache=CACHE)
+tasks_cache = aiocache.cached(ttl=60 * 60 * 4, namespace='tasks')
+
+@tasks_cache
 async def get_bxtask_from_id(task_id: str | int) -> BXTask | None:
     """Возвращает объект BXTask или None, если ответ от сервера не прошел валидацию"""
     response = await get_task_info(task_id)

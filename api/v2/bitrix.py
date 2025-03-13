@@ -32,7 +32,9 @@ async def upload_file(name: str, b64_str: str, upload_dir_id: int | str | None =
     return result["result"]
 
 
-@aiocache.cached(ttl=60 * 60 * 4, namespace='department', cache=constants.CACHE)
+department_cache = aiocache.cached(ttl=60 * 60 * 4, namespace='department')
+
+@department_cache
 async def get_departments_info(key: str | None = None) -> list[dict] | dict[str, dict]:
     """
     Возвращает информацию по всем подразделениям.
@@ -44,7 +46,9 @@ async def get_departments_info(key: str | None = None) -> list[dict] | dict[str,
     return {it[key]: it for it in response}
 
 
-@aiocache.cached(ttl=60 * 60 * 4, namespace='users', cache=constants.CACHE)
+users_cache = aiocache.cached(ttl=60 * 60 * 4, namespace='users')
+
+@users_cache
 async def get_users_by_department(department_id: str | int | None = None) -> list[dict]:
     """Получает данные пользователя по его ID"""
     params = {'ACTIVE': True}

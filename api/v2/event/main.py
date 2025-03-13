@@ -20,7 +20,9 @@ async def event_observer():
     """Прослушивает очередь и вызывает обработчик обновлений"""
     while True:
         task_id = await QUEUE.get()
-        await CACHE.delete(CACHE, task_id, namespace='tasks')
+        # if CACHE.get()
+        # CACHE.g
+        await CACHE.delete(key=task_id, namespace='tasks')
         await task_update_handler(task_id)
 
 asyncio.create_task(event_observer())
