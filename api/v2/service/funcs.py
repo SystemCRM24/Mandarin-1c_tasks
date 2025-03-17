@@ -27,7 +27,7 @@ async def get_bxtasks_from_user(user_id: str | int) -> list[BXTask]:
     print(tasks_ids)
     if not tasks_ids:
         return tasks_ids
-    coros = (get_bxtask_from_id(t['ID']) for t in tasks_ids)
+    coros = (get_bxtask_from_id(t['id']) for t in tasks_ids)
     response = await asyncio.gather(*coros)
     return sorted(
         filter(

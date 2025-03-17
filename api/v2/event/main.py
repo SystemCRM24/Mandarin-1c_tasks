@@ -4,9 +4,6 @@ from fastapi import APIRouter, Request
 from api.v2.constants import QUEUE
 from .handler import task_update_handler
 
-from api.v2.utils import uvicorn_logger
-
-
 
 router = APIRouter(prefix='/event')
 
@@ -15,7 +12,6 @@ router = APIRouter(prefix='/event')
 async def on_task_update(request: Request):
     async with request.form() as form:
         task_id = form.get('data[FIELDS_AFTER][ID]')
-    uvicorn_logger.info(task_id)
     if task_id is not None:
         await QUEUE.put(task_id)
         
@@ -24,7 +20,6 @@ async def event_observer():
     """Прослушивает очередь и вызывает обработчик обновлений"""
     while True:
         task_id = await QUEUE.get()
-        print(task_id)
         await task_update_handler(task_id)
 
 asyncio.create_task(event_observer())
