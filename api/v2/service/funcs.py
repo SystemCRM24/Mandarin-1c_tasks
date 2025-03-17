@@ -1,7 +1,7 @@
 import aiocache
 import asyncio
-from api.v2.bitrix import get_task_info, get_user_tasks
-from api.v2.bxtask import BXTask
+from api.v2.bitrix.requests import get_task_info, get_user_tasks
+from api.v2.bitrix.task import BXTask
 
 
 tasks_cache = aiocache.cached(ttl=60 * 60 * 4, namespace='tasks')
@@ -18,7 +18,7 @@ async def get_bxtask_from_id(task_id: str | int) -> BXTask | None:
     return bxtask
 
 
-async def get_bxtasks_from_user(user_id: str | int) -> list:
+async def get_bxtasks_from_user(user_id: str | int) -> list[BXTask]:
     """
     Возвращает актуальные задачи пользователя.
     Дополнительно сортирует их по возрастанию атрибута end_date_plan.
@@ -30,6 +30,9 @@ async def get_bxtasks_from_user(user_id: str | int) -> list:
     coros = (get_bxtask_from_id(t['ID']) for t in tasks_ids)
     response = await asyncio.gather(*coros)
     return sorted(
-        filter(lambda bxtask: bxtask is not None, response),
-        key=lambda bxtask: bxtask.end_date_plan
+        filter(
+            lambda bxtask: bxtask is not None, 
+            response
+        ),
+        key=lambda bxtask: bxtask.start_date_plan
     )

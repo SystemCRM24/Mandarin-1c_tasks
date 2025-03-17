@@ -1,7 +1,7 @@
 import asyncio
 
 from ..schemas.onec import FileItemSchema
-from ..bitrix import upload_file
+from api.v2.bitrix.requests import upload_file
 
 
 class Uploader:

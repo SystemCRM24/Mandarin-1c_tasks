@@ -1,8 +1,9 @@
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime
 from api.v2.constants import MOSCOW_TZ
 
-from ..bxtask import BXTask
+from api.v2.bitrix.task import BXTask
+from api.v2.bitrix.schedule import from_bitrix_schedule
 from api.v2 import bitrix
 from api.v2.service import funcs
 from .file import Uploader
@@ -84,6 +85,7 @@ class TaskHandler:
 
     async def create_task(self, responsible_id, start_date_plan):
         bxtask = BXTask()
+        schedule = await from_bitrix_schedule()
         assigner_id = await self.select_assigner()
         if assigner_id is not None:
             bxtask.assigner_id = assigner_id
@@ -99,15 +101,16 @@ class TaskHandler:
         self.task.date_start = self.order.acceptance
         self.task.deadline = self.order.deadline
         if start_date_plan is None:
-            start_date_plan = datetime.now(MOSCOW_TZ)
+            start_date_plan = schedule.get_nearest_datetime(datetime.now(MOSCOW_TZ))
         bxtask.start_date_plan = start_date_plan
-        bxtask.end_date_plan = start_date_plan + timedelta(seconds=self.calculation.time)
+        bxtask.end_date_plan = schedule.add_duration(start_date_plan, self.calculation.time)
         bxtask.time_estimate = self.calculation.time
         await self.uploader._event.wait()
         bxtask.webdav_files = [file_schema.bx_id for file_schema in self.uploader.to_upload]
         return await bxtask.create()
 
     async def update_task(self, bxtask: BXTask):
+        schedule = await from_bitrix_schedule()
         bxtask.description = "\n".join((
             f"Сумма: {self.calculation.amount}", 
             f"Рекомендуемая дата сдачи: {self.order.deadline}"
@@ -115,6 +118,7 @@ class TaskHandler:
         bxtask.date_start = self.order.acceptance
         bxtask.deadline = self.order.deadline
         bxtask.time_estimate = self.calculation.time
+        bxtask.end_date_plan = schedule.add_duration(bxtask.start_date_plan, bxtask.time_estimate)
         await self.uploader._event.wait()
         bxtask.webdav_files = [file_schema.bx_id for file_schema in self.uploader.to_upload]
         self.log.append(f'Задача была обновлена.')
