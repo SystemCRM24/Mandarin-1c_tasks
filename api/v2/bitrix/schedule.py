@@ -33,7 +33,7 @@ class Schedule:
         """Получает ближайшеий объект datetime, который находится в промежутке рабочего времени, к указанному dt"""
         if self.is_working_time(dt):
             return dt
-        total_seconds = self.work_time_start.total_seconds()
+        total_seconds = int(self.work_time_start.total_seconds())
         hour = total_seconds // 3600
         minute = (total_seconds % 3600) // 60
         second = total_seconds % 60
