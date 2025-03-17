@@ -17,9 +17,7 @@ async def task_update_handler(task_id: str):
     schedule: Schedule = await from_bitrix_schedule()
     normalize(schedule, user_tasks)
     for task in user_tasks:
-        if task._updated:
-            await task.update()
-            break
+        await task.update()
     uvicorn_logger.info(f'Task={task_id} was normalize.')
 
 

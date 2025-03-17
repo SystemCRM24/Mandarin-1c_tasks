@@ -130,12 +130,14 @@ class BXTask:
 
     async def create(self):
         request = self.get_bx_request()
+        self._updated.clear()
         return await requests.create_task(request)
 
     async def update(self):
-        request = self.get_bx_request()
-        if request:
+        if self._updated:
+            request = self.get_bx_request()
             await requests.update_task(self.id, request)
+        self._updated.clear()
         return self.id
 
     async def execute(self):
