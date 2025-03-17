@@ -118,11 +118,14 @@ class BXTask:
         request = {}
         for attr in self._updated:
             param = self.PARAM_BY_ATTR.get(attr, None)
-            if param is not None:
-                value = getattr(self, attr)
-                if attr == 'webdav_files':
-                    value = [f'n{file_id}' for file_id in value]
-                request[param] = value
+            if param is None:
+                continue
+            value = getattr(self, attr)
+            if attr == 'webdav_files':
+                value = [f'n{file_id}' for file_id in value]
+            if isinstance(value, datetime):
+                value = value.isoformat()
+            request[param] = value
         return request
 
     async def create(self):
