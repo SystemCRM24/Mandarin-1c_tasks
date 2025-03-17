@@ -22,7 +22,6 @@ async def get_bxtasks_from_user(user_id: str | int) -> list[BXTask]:
     """
     Возвращает актуальные задачи пользователя.
     Дополнительно сортирует их по возрастанию атрибута end_date_plan.
-
     """
     tasks_ids = await get_user_tasks(user_id)
     print(tasks_ids)
