@@ -23,13 +23,3 @@ MOSCOW_TZ = ZoneInfo('Europe/Moscow')
 CACHE = Cache()
 EVENT = asyncio.Event()     # Отслеживание изменений для фронта
 QUEUE = asyncio.Queue()     # Очередь для работы с событиями из битрикса.
-
-
-print(
-    BITRIX_WEBHOOK,
-    DIRECTOR_ID,
-    ONEC_GROUP_ID,
-    UPLOAD_DIR_ID,
-    SCHEDULE_ID,
-    TIMEZONE_COMPENSATION
-)

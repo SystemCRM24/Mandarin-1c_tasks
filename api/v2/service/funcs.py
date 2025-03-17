@@ -25,6 +25,7 @@ async def get_bxtasks_from_user(user_id: str | int) -> list[BXTask]:
 
     """
     tasks_ids = await get_user_tasks(user_id)
+    print(tasks_ids)
     if not tasks_ids:
         return tasks_ids
     coros = (get_bxtask_from_id(t['ID']) for t in tasks_ids)
