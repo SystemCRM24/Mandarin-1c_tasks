@@ -136,5 +136,9 @@ async def execute_task(task_id: int | str) -> str:
 
 async def get_work_schedule(id: int | str = 1) -> dict:
     """Получает настройки рабочего графика. По умолчанию - график под номером 1: для всех."""
-    result = await BX.call("timeman.schedule.get", items={"id": id}, raw=True)
+    result = await BX.call(
+        "timeman.schedule.get", 
+        items={"id": id}, 
+        raw=True
+    )
     return result["result"]
