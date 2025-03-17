@@ -1,6 +1,7 @@
 import aiocache
-from . import requests
 from datetime import datetime, timedelta
+
+from .requests import get_work_schedule
 from ..constants import SCHEDULE_ID
 
 
@@ -82,7 +83,7 @@ async def from_bitrix_schedule(schedule_id: str | int = None) -> Schedule:
     """
     if schedule_id is None:
         schedule_id = SCHEDULE_ID
-    schedule_data = await requests.get_work_schedule(schedule_id)
+    schedule_data = await get_work_schedule(schedule_id)
     print(schedule_data)
     schedule = Schedule()
     # Дополнительные выходные
