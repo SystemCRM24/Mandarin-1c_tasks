@@ -108,7 +108,7 @@ async def create_task(request_data: dict) -> str:
         items={"fields": request_data},
         raw=True
     )
-    print(response)
+    return response['result']['task']
 
 
 async def update_task(task_id: int | str, request_data: dict) -> str:
@@ -121,7 +121,7 @@ async def update_task(task_id: int | str, request_data: dict) -> str:
         },
         raw=True
     )
-    print(response)
+    return response['result']['task']
 
 
 async def execute_task(task_id: int | str) -> str:
@@ -131,7 +131,7 @@ async def execute_task(task_id: int | str) -> str:
         items={"taskId": task_id},
         raw=True
     )
-    print(response)
+    return task_id
 
 
 async def get_work_schedule(id: int | str = 1) -> dict:
