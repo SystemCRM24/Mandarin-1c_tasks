@@ -83,7 +83,7 @@ async def get_task_info(task_id: str | int) -> dict | None:
             'GROUP_ID',             # рабочая группа
             'CREATED_BY',           # постановщик
             'RESPONSIBLE_ID',       # исполнитель
-            'DATE_START',           # дата начала
+            'CREATED_DATE',         # дата создания задачи = дата принатия заказа в работу из 1с
             'DEADLINE',             # крайний срок
             'START_DATE_PLAN',      # плановое начало
             'END_DATE_PLAN',        # плановое завершение
@@ -101,7 +101,7 @@ async def get_task_info(task_id: str | int) -> dict | None:
         return tasks[0]
 
 
-async def create_task(request_data: dict) -> str:
+async def create_task(request_data: dict) -> dict:
     """Создает таску в битриксе"""
     response = await BX.call(
         method="tasks.task.add", 

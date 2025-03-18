@@ -99,7 +99,7 @@ class TaskHandler:
             f"Сумма: {self.calculation.amount}", 
             f"Рекомендуемая дата сдачи: {self.order.deadline.date()} {str(self.order.deadline.time())[:8]}"
         ))
-        bxtask.date_start = self.order.acceptance
+        bxtask.created_date = self.order.acceptance
         bxtask.deadline = self.order.deadline
         schedule = await from_bitrix_schedule()
         if start_date_plan is None:
@@ -117,7 +117,7 @@ class TaskHandler:
             f"Сумма: {self.calculation.amount}", 
             f"Рекомендуемая дата сдачи: {self.order.deadline}"
         ))
-        bxtask.date_start = self.order.acceptance
+        bxtask.created_date = self.order.acceptance
         bxtask.deadline = self.order.deadline
         bxtask.time_estimate = self.calculation.time
         bxtask.end_date_plan = schedule.add_duration(bxtask.start_date_plan, bxtask.time_estimate)

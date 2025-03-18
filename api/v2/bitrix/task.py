@@ -32,7 +32,7 @@ class BXTask:
         'responsible_id',
         'title',
         'description',
-        'date_start',
+        'created_date',
         'deadline',
         'start_date_plan',
         'end_date_plan',
@@ -57,8 +57,8 @@ class BXTask:
         bxtask.responsible_id = task_response.get('responsibleId', None)
         bxtask.title = task_response.get('title', None)
         bxtask.description = task_response.get('description', None)
-        date_start = task_response.get('dateStart', None)
-        bxtask.date_start = cls.parse_bitrix_date(date_start)
+        created_date = task_response.get('created_date', None)
+        bxtask.created_date = cls.parse_bitrix_date(created_date)
         deadline = task_response.get('deadline', None)
         bxtask.deadline = cls.parse_bitrix_date(deadline)
         start_date_plan = task_response.get('startDatePlan', None)
@@ -82,7 +82,7 @@ class BXTask:
         self.title = None
         self.description = None
         # Временные метки
-        self.date_start = None
+        self.created_date = None
         self.deadline = None
         self.start_date_plan = None
         self.end_date_plan = None
@@ -133,8 +133,7 @@ class BXTask:
         request = self.get_bx_request()
         self._updated.clear()
         response = await requests.create_task(request)
-        print(response)
-        return '1'
+        return response.get('id', '-1')
 
     async def update(self):
         if self._updated:
