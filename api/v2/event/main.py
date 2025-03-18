@@ -12,7 +12,6 @@ router = APIRouter(prefix='/event')
 async def on_task_update(request: Request):
     async with request.form() as form:
         task_id = form.get('data[FIELDS_AFTER][ID]')
-    return task_id
     if task_id is not None:
         await QUEUE.put(task_id)
         
