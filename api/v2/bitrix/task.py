@@ -125,7 +125,7 @@ class BXTask:
                 value = [f'n{file_id}' for file_id in value]
             if isinstance(value, datetime):
                 if TIMEZONE_COMPENSATION:
-                    value += MOSCOW_TZ.dst()
+                    value += MOSCOW_TZ.utcoffset(datetime)
                 value = value.isoformat()
             request[param] = value
         return request
