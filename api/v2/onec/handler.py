@@ -98,8 +98,8 @@ class TaskHandler:
             f"Сумма: {self.calculation.amount}", 
             f"Рекомендуемая дата сдачи: {self.order.deadline}"
         ))
-        self.task.date_start = self.order.acceptance
-        self.task.deadline = self.order.deadline
+        bxtask.date_start = self.order.acceptance
+        bxtask.deadline = self.order.deadline
         if start_date_plan is None:
             start_date_plan = schedule.get_nearest_datetime(datetime.now(MOSCOW_TZ))
         bxtask.start_date_plan = start_date_plan
