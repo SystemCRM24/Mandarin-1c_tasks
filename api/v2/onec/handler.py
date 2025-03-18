@@ -4,7 +4,7 @@ from api.v2.constants import MOSCOW_TZ
 
 from api.v2.bitrix.task import BXTask
 from api.v2.bitrix.schedule import from_bitrix_schedule
-from api.v2 import bitrix
+from api.v2.bitrix import requests
 from api.v2.service import funcs
 from .file import Uploader
 from ..schemas import onec
@@ -42,11 +42,11 @@ class TaskHandler:
         """
         Получает задачи персонала подразделения. Обновляет атрибут self.department_tasks
         """
-        departments: dict[str, dict] = await bitrix.get_departments_info(key='NAME')
+        departments: dict[str, dict] = await requests.get_departments_info(key='NAME')
         department_id = departments.get(self.calculation.position, None)
         if department_id is None:
             return
-        users = await bitrix.get_users_by_department(department_id)
+        users = await requests.get_users_by_department(department_id)
         if not users:
             return
         coros = (funcs.get_bxtasks_from_user(u['ID']) for u in users)
@@ -130,7 +130,7 @@ class TaskHandler:
     
     async def select_assigner(self) -> str | None:
         """Определяет постановщика задачи"""
-        departments: dict[str, dict] = await bitrix.get_departments_info(key='NAME')
+        departments: dict[str, dict] = await requests.get_departments_info(key='NAME')
         if self.calculation.position not in departments:
             self.log.append(f'Не найдено подразделение {self.calculation.position}.')
             return
