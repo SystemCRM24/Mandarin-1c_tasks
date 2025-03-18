@@ -45,7 +45,7 @@ class TaskSchema(BaseModel):
         """Округляет время в потолок"""
         try:
             value = datetime.fromisoformat(value)
-        except ValueError:
+        except (ValueError, TypeError):
             value = datetime.now()
         return value.replace(tzinfo=ZoneInfo('Europe/Moscow'))
 
