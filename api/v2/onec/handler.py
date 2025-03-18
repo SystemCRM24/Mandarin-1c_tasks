@@ -43,6 +43,7 @@ class TaskHandler:
         Получает задачи персонала подразделения. Обновляет атрибут self.department_tasks
         """
         departments: dict[str, dict] = await requests.get_departments_info(key='NAME')
+        print(departments)
         department_id = departments.get(self.calculation.position, None)
         if department_id is None:
             return
