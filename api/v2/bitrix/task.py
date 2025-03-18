@@ -15,7 +15,7 @@ class BXTask:
         'responsible_id': 'RESPONSIBLE_ID',
         'title': 'TITLE',
         'description': 'DESCRIPTION',
-        'date_start': 'DATE_START',
+        'created_date': 'CREATED_DATE',
         'deadline': 'DEADLINE',
         'start_date_plan': 'START_DATE_PLAN',
         'end_date_plan': 'END_DATE_PLAN',
