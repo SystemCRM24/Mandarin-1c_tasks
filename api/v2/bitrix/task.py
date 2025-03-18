@@ -71,11 +71,10 @@ class BXTask:
         return bxtask
 
     def __init__(self):
-        self._updated = set()
         # Метаинформация по задаче
         self.id = None
         self.group_id = None
-        self.allow_time_tracking = 'Y'
+        self.allow_time_tracking = None
         # Персонал задачи
         self.assigner_id = None
         self.responsible_id = None
@@ -91,7 +90,7 @@ class BXTask:
         # Прикрепленные файлы
         self.webdav_files = None
         # Чистим множество после инициализации
-        self._updated.clear()
+        self._updated = set()
     
     def is_valid(self) -> bool:
         """Проверяет задачу на валидность."""

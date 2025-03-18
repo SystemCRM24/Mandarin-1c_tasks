@@ -86,6 +86,7 @@ class TaskHandler:
     async def create_task(self, responsible_id, start_date_plan):
         bxtask = BXTask()
         bxtask.group_id = constants.ONEC_GROUP_ID
+        bxtask.allow_time_tracking = 'Y'
         bxtask.assigner_id = await self.select_assigner()
         if responsible_id is None:
             self.log.append(f'Не найден исполнитель для {self.calculation.position}.')
