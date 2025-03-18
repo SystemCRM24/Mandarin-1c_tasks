@@ -111,7 +111,6 @@ async def create_task(request_data: dict) -> str:
         )
         return response['result']['task']
     except Exception as e:
-        print(response)
         print(e)
     
 
