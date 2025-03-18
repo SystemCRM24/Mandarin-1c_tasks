@@ -29,7 +29,7 @@ class TaskHandler:
         """Ставит задачу"""
         await self.get_department_tasks()
         handler = self._select_handler()
-        task_id = await handler()
+        task_id = await handler
         response = onec.ResponseItemSchema(
             position=self.calculation.position,
             task_id=task_id
