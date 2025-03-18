@@ -1,6 +1,6 @@
 import asyncio
 from datetime import datetime
-from api.v2.constants import MOSCOW_TZ
+from api.v2 import constants
 
 from api.v2.bitrix.task import BXTask
 from api.v2.bitrix.schedule import from_bitrix_schedule
@@ -85,14 +85,12 @@ class TaskHandler:
 
     async def create_task(self, responsible_id, start_date_plan):
         bxtask = BXTask()
-        schedule = await from_bitrix_schedule()
-        assigner_id = await self.select_assigner()
-        if assigner_id is not None:
-            bxtask.assigner_id = assigner_id
+        bxtask.group_id = constants.ONEC_GROUP_ID
+        bxtask.assigner_id = await self.select_assigner()
         if responsible_id is None:
             self.log.append(f'Не найден исполнитель для {self.calculation.position}.')
-        else:
-            bxtask.responsible_id = responsible_id
+            responsible_id = constants.DIRECTOR_ID
+        bxtask.responsible_id = responsible_id
         bxtask.title = f"{self.calculation.position}: {self.order.name}"
         bxtask.description = "\n".join((
             f"Сумма: {self.calculation.amount}", 
@@ -100,8 +98,9 @@ class TaskHandler:
         ))
         bxtask.date_start = self.order.acceptance
         bxtask.deadline = self.order.deadline
+        schedule = await from_bitrix_schedule()
         if start_date_plan is None:
-            start_date_plan = schedule.get_nearest_datetime(datetime.now(MOSCOW_TZ))
+            start_date_plan = schedule.get_nearest_datetime(datetime.now(constants.MOSCOW_TZ))
         bxtask.start_date_plan = start_date_plan
         bxtask.end_date_plan = schedule.add_duration(start_date_plan, self.calculation.time)
         bxtask.time_estimate = self.calculation.time
@@ -138,5 +137,5 @@ class TaskHandler:
         assigner: str = department.get('UF_HEAD', None)
         if assigner is None:
             self.log.append(f'В подразделении {self.calculation.position} нет руководителя.')
-            return
+            return constants.DIRECTOR_ID
         return assigner

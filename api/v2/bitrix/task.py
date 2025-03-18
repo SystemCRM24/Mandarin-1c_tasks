@@ -25,7 +25,7 @@ class BXTask:
 
     __slots__ = (
         '_updated',
-        'id', 
+        'id',
         'group_id',
         'allow_time_tracking',
         'assigner_id',
@@ -74,11 +74,11 @@ class BXTask:
         self._updated = set()
         # Метаинформация по задаче
         self.id = None
-        self.group_id = ONEC_GROUP_ID
+        self.group_id = None
         self.allow_time_tracking = 'Y'
         # Персонал задачи
-        self.assigner_id = DIRECTOR_ID
-        self.responsible_id = DIRECTOR_ID
+        self.assigner_id = None
+        self.responsible_id = None
         # Текстовая информация задачи
         self.title = None
         self.description = None
