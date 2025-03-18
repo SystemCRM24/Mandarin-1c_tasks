@@ -133,11 +133,9 @@ class BXTask:
         request = self.get_bx_request()
         self._updated.clear()
         response = await requests.create_task(request)
-        print(response)
         return response.get('id', '-1')
 
     async def update(self):
-        print(self.id)
         if self._updated:
             request = self.get_bx_request()
             await requests.update_task(self.id, request)
