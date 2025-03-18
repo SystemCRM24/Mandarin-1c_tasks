@@ -60,8 +60,8 @@ class Schedule:
             next_date += timedelta(days=1) - self.work_day_duration
         # Проверка на выходные, праздники и тп.
         print(next_date)
-        # while not self.is_working_time(next_date):
-        #     next_date += timedelta(days=1)
+        while not self.is_working_time(next_date):
+            next_date += timedelta(days=1)
         return next_date
     
     def get_duration(self, start: datetime, end: datetime) -> timedelta:
