@@ -1,8 +1,8 @@
 from typing import Self
-from datetime import datetime
+from datetime import datetime, timedelta
 from . import requests
 
-from ..constants import MOSCOW_TZ, ONEC_GROUP_ID, DIRECTOR_ID
+from ..constants import MOSCOW_TZ, TIMEZONE_COMPENSATION, DIRECTOR_ID
 
 
 class BXTask:
@@ -124,6 +124,8 @@ class BXTask:
             if attr == 'webdav_files':
                 value = [f'n{file_id}' for file_id in value]
             if isinstance(value, datetime):
+                if TIMEZONE_COMPENSATION:
+                    value += MOSCOW_TZ.dst()
                 value = value.isoformat()
             request[param] = value
         return request
