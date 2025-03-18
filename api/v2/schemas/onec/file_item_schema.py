@@ -7,7 +7,7 @@ class FileItemSchema(BaseModel):
     """Схема прилагаемых файлов"""
     name: str = Field(alias="Имя")
     binary: str = Field(alias="ДвоичныеДанные", exclude=True)
-    bx_id: str | None = None
+    bx_id: int | None = None
 
     @field_validator('binary', mode='after')
     @classmethod
