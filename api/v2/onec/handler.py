@@ -55,6 +55,7 @@ class TaskHandler:
             key = users[i]['ID']
             value = tasks[i]
             self.department_tasks[key] = value
+        print(self.department_tasks)
 
     def _select_handler(self):
         """
@@ -93,9 +94,10 @@ class TaskHandler:
             responsible_id = constants.DIRECTOR_ID
         bxtask.responsible_id = responsible_id
         bxtask.title = f"{self.calculation.position}: {self.order.name}"
+
         bxtask.description = "\n".join((
             f"Сумма: {self.calculation.amount}", 
-            f"Рекомендуемая дата сдачи: {self.order.deadline}"
+            f"Рекомендуемая дата сдачи: {self.order.deadline.date()} {str(self.order.deadline.time())[:8]}"
         ))
         bxtask.date_start = self.order.acceptance
         bxtask.deadline = self.order.deadline

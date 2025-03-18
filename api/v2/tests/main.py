@@ -7,4 +7,4 @@ MOSCOW_TZ = ZoneInfo('Europe/Moscow')
 
 now = datetime.now(MOSCOW_TZ)
 
-print(type(MOSCOW_TZ.utcoffset(now)))
+print(now.date(), str(now.time())[:8])
