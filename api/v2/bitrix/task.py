@@ -1,5 +1,5 @@
 from typing import Self
-from datetime import datetime, timedelta
+from datetime import datetime
 from . import requests
 
 from ..constants import MOSCOW_TZ, TIMEZONE_COMPENSATION, DIRECTOR_ID
@@ -131,9 +131,10 @@ class BXTask:
 
     async def create(self):
         request = self.get_bx_request()
-        print(request)
         self._updated.clear()
-        return await requests.create_task(request)
+        response = await requests.create_task(request)
+        print(response)
+        return '1'
 
     async def update(self):
         if self._updated:

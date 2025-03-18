@@ -56,7 +56,6 @@ class TaskHandler:
             key = users[i]['ID']
             value = tasks[i]
             self.department_tasks[key] = value
-        print(self.department_tasks)
 
     def _select_handler(self):
         """

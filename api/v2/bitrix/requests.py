@@ -103,15 +103,12 @@ async def get_task_info(task_id: str | int) -> dict | None:
 
 async def create_task(request_data: dict) -> str:
     """Создает таску в битриксе"""
-    try:
-        response = await BX.call(
-            method="tasks.task.add", 
-            items={"fields": request_data},
-            raw=True
-        )
-        return response['result']['task']
-    except Exception as e:
-        print(e)
+    response = await BX.call(
+        method="tasks.task.add", 
+        items={"fields": request_data},
+        raw=True
+    )
+    return response['result']['task']
     
 
 
