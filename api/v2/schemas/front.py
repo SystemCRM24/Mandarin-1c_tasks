@@ -16,6 +16,13 @@ class ResourceSchema(BaseModel):
     department: str | int
 
 
+class FromFrontTaskSchema(BaseModel):
+    id: int
+    label: str
+    resourceId: int
+    
+
+
 class TaskSchema(BaseModel):
     """Схема задачи"""
     id: str | int
