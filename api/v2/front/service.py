@@ -103,5 +103,5 @@ async def generate_workdate_ranges(interval: front.IntervalSchema) -> list[front
     return ranges
 
 
-async def update_from_front_task():
-    pass
+async def update_from_front_task(task):
+    print(task)

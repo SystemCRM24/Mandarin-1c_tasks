@@ -1,7 +1,7 @@
 import asyncio
 
 from fastapi import APIRouter, Request
-from api.v2.constants import QUEUE
+from api.v2.constants import QUEUE, EVENT
 from .handler import task_update_handler
 
 
@@ -21,5 +21,7 @@ async def event_observer():
     while True:
         task_id = await QUEUE.get()
         await task_update_handler(task_id)
+        if QUEUE.empty():
+            EVENT.set()
 
 asyncio.create_task(event_observer())
