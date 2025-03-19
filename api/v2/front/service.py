@@ -104,7 +104,10 @@ async def generate_workdate_ranges(interval: front.IntervalSchema) -> list[front
     return ranges
 
 
-async def update_from_front_task(task: str):
-    task = front.FromFrontTaskSchema.model_validate_json(task)
-    uvicorn_logger.info(str(task))
-    print(task)
+async def update_from_front_task(json_string: str):
+    task = front.FromFrontTaskSchema.model_validate_json(json_string)
+    bxtask: BXTask = get_bxtask_from_id(task.id)
+    bxtask.responsible_id = task.resourceId
+    bxtask.start_date_plan = task.time.start
+    bxtask.end_date_plan = task.time.end
+    await bxtask.update()
