@@ -10,6 +10,7 @@ from api.v2.utils import uvicorn_logger
 async def task_update_handler(task_id: str):
     await clear_cache(task_id)
     task = await get_bxtask_from_id(task_id)
+    print(task)
     if task is None:
         uvicorn_logger.info(f'Task={task_id} is not valid.')
         return
