@@ -10,7 +10,6 @@ from api.v2.service.funcs import get_bxtasks_from_user
 async def fetch_websocket_data() -> front.WebSocketDataSchema:
     resources_dct = await get_resources()
     start, end, tasks = await get_tasks(resources_dct)
-    print(start, end, tasks)
     interval = await generate_total_range(start, end)
     ranges = await generate_workdate_ranges(interval)
     return front.WebSocketDataSchema(
