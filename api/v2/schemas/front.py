@@ -13,7 +13,7 @@ class IntervalSchema(BaseModel):
     @classmethod
     def validate_date(cls, value) -> datetime:
         if isinstance(value, int):
-            return datetime.fromtimestamp(value, MOSCOW_TZ)
+            return datetime.fromtimestamp(value / 1000, MOSCOW_TZ)
         return value
 
 

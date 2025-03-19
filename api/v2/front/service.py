@@ -105,5 +105,6 @@ async def generate_workdate_ranges(interval: front.IntervalSchema) -> list[front
 
 
 async def update_from_front_task(task: str):
+    task = front.FromFrontTaskSchema.model_validate_json(task)
     uvicorn_logger.info(front.FromFrontTaskSchema.model_validate_json(task))
     print(task)
