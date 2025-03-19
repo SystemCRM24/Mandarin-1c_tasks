@@ -51,7 +51,7 @@ users_cache = aiocache.cached(ttl=60 * 60 * 4, namespace='users')
 
 @users_cache
 async def get_users_by_department(department_id: str | int | None = None) -> list[dict]:
-    """Получает данные пользователя по его ID"""
+    """Получает данные пользователей по ID подразделения"""
     params = {'ACTIVE': True}
     if department_id is not None:
         params['@UF_DEPARTMENT'] = [department_id]

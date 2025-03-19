@@ -15,6 +15,7 @@ DIRECTOR_ID = environ.get('DIRECTOR_ID')
 ONEC_GROUP_ID = environ.get('ONEC_GROUP_ID')
 UPLOAD_DIR_ID = environ.get('UPLOAD_DIR_ID')
 SCHEDULE_ID = environ.get('SCHEDULE_ID')
+DEPARTMENT_ID = environ.get('DEPARTMENT_ID')
 TIMEZONE_COMPENSATION = bool(environ.get('TIMEZONE_COMPENSATION'))
 
 
