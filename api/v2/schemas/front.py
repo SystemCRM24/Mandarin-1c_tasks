@@ -1,12 +1,20 @@
 """Схемы для работы с данными для фронт-части приложения"""
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from datetime import datetime
+from api.v2.constants import MOSCOW_TZ
 
 
 class IntervalSchema(BaseModel):
     """Схема Временного промежутка"""
     start: datetime
     end: datetime
+
+    @field_validator('start', 'end', mode='before')
+    @classmethod
+    def validate_date(cls, value) -> datetime:
+        if isinstance(value, int):
+            return datetime.fromtimestamp(value, MOSCOW_TZ)
+        return value
 
 
 class ResourceSchema(BaseModel):
@@ -17,10 +25,11 @@ class ResourceSchema(BaseModel):
 
 
 class FromFrontTaskSchema(BaseModel):
-    id: int
+    id: str
     label: str
-    resourceId: int
-    
+    resourceId: str
+    time: IntervalSchema
+    deadline: int
 
 
 class TaskSchema(BaseModel):
