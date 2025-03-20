@@ -90,6 +90,8 @@ async def get_task_info(task_id: str | int) -> dict | None:
             'TIME_ESTIMATE',        # время, выделенное на задачу;
             'UF_TASK_WEBDAV_FILES', # Прикрепленные файлы 
             'ALLOW_TIME_TRACKING',  # Флаг для разрешения трекинга времени
+            'DURATION_TYPE',
+            'DURATION_PLAN',
         ],
         'filter': {
             'ID': task_id
