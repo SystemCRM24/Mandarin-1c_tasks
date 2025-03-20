@@ -1,17 +1,7 @@
-from pydantic import BaseModel
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 
-class Item(BaseModel):
-    value: int
-
-
-class Base(BaseModel):
-    data: list[Item]
-
-
-dct = {
-    '1': Item(value=1),
-    '2': Item(value=2)
-}
-
-base = Base.model_validate({'data': })
+d = datetime.fromisoformat('2025-03-19T09:30:00.000Z')
+d = d.astimezone(ZoneInfo('Europe/Moscow'))
+print(d)
