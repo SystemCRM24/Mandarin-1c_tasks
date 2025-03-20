@@ -26,8 +26,6 @@ def normalize(schedule: Schedule, tasks: list[BXTask]):
     """Нормализует время в задачах, если это необходимо"""
     now = datetime.now(MOSCOW_TZ)
     for index, task in enumerate(tasks):
-        time_estimate = schedule.get_duration(task.start_date_plan, task.end_date_plan)
-        task.time_estimate = int(time_estimate.total_seconds())
         if index == 0:
             start_date_plan = task.start_date_plan
             if now < start_date_plan:
@@ -35,8 +33,12 @@ def normalize(schedule: Schedule, tasks: list[BXTask]):
         else:
             prev_task = tasks[index - 1]
             start_date_plan = prev_task.end_date_plan
-        task.start_date_plan = schedule.get_nearest_datetime(start_date_plan)
-        task.end_date_plan = schedule.add_duration(start_date_plan, time_estimate)
+        start_date_plan = schedule.get_nearest_datetime(start_date_plan)
+        task.start_date_plan = start_date_plan
+        time_estimate = schedule.get_duration(task.start_date_plan, task.end_date_plan)
+        
+        task.time_estimate = int(time_estimate.total_seconds())
+        task.end_date_plan = schedule.add_duration(task.start_date_plan, time_estimate)
 
 
 async def clear_cache(task_id: str) -> bool:

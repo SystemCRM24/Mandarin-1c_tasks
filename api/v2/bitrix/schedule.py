@@ -71,7 +71,6 @@ class Schedule:
         # возрващаем отнятую секунду
         if total_delta == self.work_time_end:
             dt += timedelta(seconds=1)
-            uvicorn_logger.info(str(dt))
         return dt
     
     def get_duration(self, start: datetime, end: datetime) -> timedelta:
@@ -79,9 +78,9 @@ class Schedule:
         minute = timedelta(minutes=1)
         duration = timedelta(minutes=0)
         while start < end:
-            start += minute
             if self.is_working_time(start):
                 duration += minute
+            start += minute
         return duration
     
 
