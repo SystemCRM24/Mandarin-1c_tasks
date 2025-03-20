@@ -44,24 +44,32 @@ class Schedule:
 
     def add_duration(self, start: datetime, duration: int | timedelta) -> datetime:
         """Прибавляет к start duration - время в секундах (или готовый объект timedelta) c учетом рабочего времени."""
-        next_date = self.get_nearest_datetime(start)
         if isinstance(duration, (int, float)):
             duration = timedelta(seconds=duration)
+        dt = self.get_nearest_datetime(start)
+        # Различное черное колдунство с датами.
+        wd_duration = int(self.work_day_duration.total_seconds())
+        duration_by_seconds = int(duration.total_seconds())
+        wd_in_duration = duration_by_seconds // wd_duration     # полных рабочих дней
+        remains = duration_by_seconds % wd_duration             # остаток
+        remains_td = timedelta(seconds=remains)
+        dt_delta = timedelta(hours=dt.hour, minutes=dt.minute, seconds=dt.second)
+        total_delta = dt_delta + remains_td
+        dt += remains_td
+        # Отнимаем секунду, чтобы прошла проверка. 
+        if total_delta == self.work_time_end:
+            dt -= timedelta(seconds=1)
+        if total_delta > self.work_time_end:
+            dt = self.get_nearest_datetime(dt) + (total_delta - self.work_time_end)  
         # Прибавляем дни по рабочим часам
-        while duration > self.work_day_duration:
-            next_date += timedelta(days=1)
-            duration -= self.work_day_duration
-            while not self.is_working_time(next_date):
-                next_date += timedelta(days=1)
-         # Проверка того, чтобы остаток не попал на время после окончания рабочего дня
-        next_date += duration
-        remains = timedelta(hours=next_date.hour, minutes=next_date.minute, seconds=next_date.second)
-        if remains > self.work_time_end:
-            next_date += timedelta(days=1) - self.work_day_duration
-        # Проверка на выходные, праздники и тп.
-        while not self.is_working_time(next_date):
-            next_date += timedelta(days=1)
-        return next_date
+        while wd_in_duration:
+            dt += timedelta(days=1)
+            if self.is_working_time(dt):
+                wd_in_duration -= 1
+        # возрващаем отнятую секунду
+        if total_delta == self.work_time_end:
+            dt += timedelta(seconds=1)
+        return dt
     
     def get_duration(self, start: datetime, end: datetime) -> timedelta:
         """Высчитывает продолжительность рабочего времени между start и end"""
