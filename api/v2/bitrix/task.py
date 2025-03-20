@@ -154,6 +154,7 @@ class BXTask:
         if self._updated:
             self.recalculate_total_duration()
             request = self.get_bx_request()
+            
             await requests.update_task(self.id, request)
         self._updated.clear()
         return self.id

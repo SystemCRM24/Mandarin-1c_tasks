@@ -5,6 +5,7 @@ from fast_bitrix24 import BitrixAsync
 import aiocache
 
 from api.v2 import constants
+from api.v2.utils import uvicorn_logger
 
 
 BX = BitrixAsync(constants.BITRIX_WEBHOOK)
@@ -116,6 +117,7 @@ async def create_task(request_data: dict) -> dict:
 
 async def update_task(task_id: int | str, request_data: dict) -> str:
     """Обновляет задачу"""
+    uvicorn_logger.info(request_data)
     response = await BX.call(
         method="tasks.task.update", 
         items={
