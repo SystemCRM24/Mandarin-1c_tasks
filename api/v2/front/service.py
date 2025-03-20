@@ -5,7 +5,6 @@ from api.v2 import constants
 from api.v2.schemas import front
 from api.v2.bitrix import requests, schedule
 from api.v2.service.funcs import get_bxtasks_from_user, get_bxtask_from_id, BXTask
-from api.v2.utils import uvicorn_logger
 
 
 async def fetch_websocket_data() -> front.WebSocketDataSchema:
