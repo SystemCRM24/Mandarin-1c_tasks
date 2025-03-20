@@ -22,7 +22,7 @@ class BXTask:
         'time_estimate': 'TIME_ESTIMATE',
         'webdav_files': 'UF_TASK_WEBDAV_FILES',
         'duration_type': 'DURATION_TYPE',
-        'duraton_plan': 'DURATION_PLAN'
+        'duration_plan': 'DURATION_PLAN'
     }
 
     __slots__ = (
