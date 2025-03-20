@@ -72,7 +72,7 @@ class BXTask:
         bxtask.time_estimate = int(task_response.get('timeEstimate', 0))
         bxtask.webdav_files = task_response.get('ufTaskWebdavFiles', None)
         bxtask.duration_type = task_response.get('durationType', 0)
-        bxtask.duraton_plan = task_response.get('durationPlan', '0')
+        bxtask.duration_plan = task_response.get('durationPlan', '0')
         bxtask._updated.clear()
         return bxtask
 
