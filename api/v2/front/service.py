@@ -110,5 +110,4 @@ async def update_from_front_task(json_string: str):
     bxtask.responsible_id = task.resourceId
     bxtask.start_date_plan = task.time.start.astimezone(constants.MOSCOW_TZ)
     bxtask.end_date_plan = task.time.end.astimezone(constants.MOSCOW_TZ)
-    uvicorn_logger.info(str(bxtask))
-    # await bxtask.update()
+    await bxtask.update()
