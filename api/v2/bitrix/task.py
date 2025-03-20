@@ -21,8 +21,8 @@ class BXTask:
         'end_date_plan': 'END_DATE_PLAN',
         'time_estimate': 'TIME_ESTIMATE',
         'webdav_files': 'UF_TASK_WEBDAV_FILES',
-        'duration_type': 'DURATION_TYPE',
-        'duration_plan': 'DURATION_PLAN'
+        # 'duration_type': 'DURATION_TYPE',
+        # 'duration_plan': 'DURATION_PLAN'
     }
 
     __slots__ = (
@@ -40,8 +40,8 @@ class BXTask:
         'end_date_plan',
         'time_estimate',
         'webdav_files',
-        'duration_type',
-        'duration_plan'
+        # 'duration_type',
+        # 'duration_plan'
     )
 
     @staticmethod
@@ -71,8 +71,8 @@ class BXTask:
         bxtask.end_date_plan = cls.parse_bitrix_date(end_date_plan)
         bxtask.time_estimate = int(task_response.get('timeEstimate', 0))
         bxtask.webdav_files = task_response.get('ufTaskWebdavFiles', None)
-        bxtask.duration_type = task_response.get('durationType', 0)
-        bxtask.duration_plan = task_response.get('durationPlan', '0')
+        # bxtask.duration_type = task_response.get('durationType', 0)
+        # bxtask.duration_plan = task_response.get('durationPlan', '0')
         bxtask._updated.clear()
         return bxtask
 
@@ -93,8 +93,8 @@ class BXTask:
         self.start_date_plan = None
         self.end_date_plan = None
         self.time_estimate = None   # Время в секундах
-        self.duration_type = None
-        self.duration_plan = None
+        # self.duration_type = None
+        # self.duration_plan = None
         # Прикрепленные файлы
         self.webdav_files = None
         # Чистим множество после инициализации
@@ -122,6 +122,11 @@ class BXTask:
         return f'{self.__class__.__name__}({", ".join(gen)})'
     
     def get_bx_request(self) -> dict:
+        plan_attr = ('start_date_plan', 'end_date_plan')
+        if plan_attr[0] in self._updated:
+            self._updated.add(plan_attr[1])
+        if plan_attr[1] in self._updated:
+            self._updated.add(plan_attr[0])
         request = {}
         for attr in self._updated:
             param = self.PARAM_BY_ATTR.get(attr, None)
@@ -137,12 +142,12 @@ class BXTask:
             request[param] = value
         return request
     
-    def recalculate_total_duration(self):
-        """высчитывает разницу в секундах между start_date_plan и end_date_plan"""
-        start: datetime = self.start_date_plan
-        end: datetime = self.end_date_plan
-        self.duration_plan = int((end - start).total_seconds())
-        self.duration_type = 0
+    # def recalculate_total_duration(self):
+    #     """высчитывает разницу в секундах между start_date_plan и end_date_plan"""
+    #     start: datetime = self.start_date_plan
+    #     end: datetime = self.end_date_plan
+    #     self.duration_plan = int((end - start).total_seconds())
+    #     self.duration_type = 0
 
     async def create(self):
         request = self.get_bx_request()
@@ -152,9 +157,8 @@ class BXTask:
 
     async def update(self):
         if self._updated:
-            self.recalculate_total_duration()
+            # self.recalculate_total_duration()
             request = self.get_bx_request()
-            
             await requests.update_task(self.id, request)
         self._updated.clear()
         return self.id
