@@ -41,7 +41,7 @@ class BXTask:
         'time_estimate',
         'webdav_files',
         'duration_type',
-        'duraton_plan'
+        'duration_plan'
     )
 
     @staticmethod
