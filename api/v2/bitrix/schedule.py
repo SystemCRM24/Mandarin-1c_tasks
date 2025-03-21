@@ -19,6 +19,18 @@ class Schedule:
         self.work_time_end = timedelta(seconds=64_800)
         self.work_day_duration = timedelta(seconds=32_400)
     
+    @staticmethod
+    def split_timedelta(td: timedelta) -> tuple[int, int, int]:
+        """
+        Разбивает объект timedelta на часы, минуты и секунды.
+        Если присутсвуют микросекунды, то они будут отброшены.
+        """
+        seconds_in_delta = int(td.total_seconds())
+        hours = seconds_in_delta // 3600
+        minutes = (seconds_in_delta % 3600) // 60
+        seconds = seconds_in_delta % 60
+        return hours, minutes, seconds
+    
     def is_working_time(self, dt: datetime) -> bool:
         """
         Проверяет, что переданный объект datetime находится в промежутках рабочего времени.
@@ -43,7 +55,7 @@ class Schedule:
             dt += timedelta(days=1)
         return dt
 
-    def add_duration(self, start: datetime, duration: int | timedelta) -> datetime:
+    def _add_duration(self, start: datetime, duration: int | timedelta) -> datetime:
         """Прибавляет к start duration - время в секундах (или готовый объект timedelta) c учетом рабочего времени."""
         if isinstance(duration, (int, float)):
             duration = timedelta(seconds=duration)
@@ -72,6 +84,22 @@ class Schedule:
         if total_delta == self.work_time_end:
             dt += timedelta(seconds=1)
         return dt
+
+    def add_duration(self, start: datetime, duration: int | timedelta) -> datetime:
+        """
+        Прибавляет к start duration - время в секундах (или готовый объект timedelta) c учетом рабочего времени.
+        Если результат равен 9:00, то откатывает до 18:00 предыдущего рабочего дня.
+        """
+        result = self._add_duration(start, duration)
+        result_delta = timedelta(hours=result.hour, minutes=result.minute, seconds=result.second)
+        if result_delta == self.work_time_start:
+            while True:
+                result -= timedelta(days=1)
+                if self.is_working_time(result):
+                    break
+            hour, minute, second = self.split_timedelta(self.work_time_end)
+            result = result.replace(hour=hour, minute=minute, second=second)
+        return result
     
     def get_duration(self, start: datetime, end: datetime) -> timedelta:
         """Высчитывает продолжительность рабочего времени между start и end"""
