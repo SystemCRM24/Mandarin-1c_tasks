@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 import asyncio
+import aiocache
 
 from api.v2 import constants
 from api.v2.schemas import front
@@ -93,6 +94,9 @@ async def generate_total_range(start: datetime, end: datetime) -> front.Interval
     return front.IntervalSchema(start=start_of_week, end=end_of_week)
 
 
+wd_ranges_cache = aiocache.cached(ttl=60 * 60 * 24, namespace="wd_ranges")
+
+@wd_ranges_cache
 async def generate_workdate_ranges(interval: front.IntervalSchema) -> list[front.IntervalSchema]:
     """Генерирует рабочие промежутки."""
     main_schedule: schedule.Schedule = await schedule.from_bitrix_schedule()
