@@ -2,7 +2,7 @@ from typing import Self
 from datetime import datetime
 from . import requests
 
-from ..constants import MOSCOW_TZ, TIMEZONE_COMPENSATION, DIRECTOR_ID
+from api.v2 import constants
 
 
 class BXTask:
@@ -45,7 +45,7 @@ class BXTask:
         """Парсит дату из битрикса. Принудительно заменяет часовой пояс на московский."""
         if datestring is None or not datestring:
             return None
-        return datetime.fromisoformat(datestring).replace(tzinfo=MOSCOW_TZ)
+        return datetime.fromisoformat(datestring).replace(tzinfo=constants.MOSCOW_TZ)
 
     @classmethod
     def from_bitrix(cls, task_response: dict) -> Self:
@@ -95,10 +95,9 @@ class BXTask:
     def is_valid(self) -> bool:
         """Проверяет задачу на валидность."""
         return all((
-            self.group_id,
+            self.group_id == constants.ONEC_GROUP_ID,
             self.assigner_id,
-            self.responsible_id != DIRECTOR_ID,
-            self.title,
+            self.responsible_id != constants.DIRECTOR_ID,
             self.start_date_plan,
             self.end_date_plan
         ))
@@ -128,8 +127,8 @@ class BXTask:
             if attr == 'webdav_files':
                 value = [f'n{file_id}' for file_id in value]
             if isinstance(value, datetime):
-                if TIMEZONE_COMPENSATION:
-                    value += MOSCOW_TZ.utcoffset(value)
+                if constants.TIMEZONE_COMPENSATION:
+                    value += constants.MOSCOW_TZ.utcoffset(value)
                 value = value.isoformat()
             request[param] = value
         return request
@@ -142,7 +141,6 @@ class BXTask:
 
     async def update(self):
         if self._updated:
-            # self.recalculate_total_duration()
             request = self.get_bx_request()
             await requests.update_task(self.id, request)
         self._updated.clear()

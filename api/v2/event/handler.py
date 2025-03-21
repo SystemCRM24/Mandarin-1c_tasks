@@ -36,7 +36,6 @@ def normalize(schedule: Schedule, tasks: list[BXTask]):
         start_date_plan = schedule.get_nearest_datetime(start_date_plan)
         task.start_date_plan = start_date_plan
         time_estimate = schedule.get_duration(task.start_date_plan, task.end_date_plan)
-        
         task.time_estimate = int(time_estimate.total_seconds())
         task.end_date_plan = schedule.add_duration(task.start_date_plan, time_estimate)
 
