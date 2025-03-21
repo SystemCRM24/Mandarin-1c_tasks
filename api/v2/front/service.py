@@ -78,11 +78,17 @@ async def get_tasks(resources: dict[str, front.ResourceSchema]) -> tuple[str, st
 
 
 async def generate_total_range(start: datetime, end: datetime) -> front.IntervalSchema:
-    """Округляет старт и энд до первой и последней секунды в неделе"""
+    """
+    Округляет старт и энд до первой и последней секунды в неделе.
+    Дополнительно прибавляет неделю, если end - пятница, суббота или воскресенье.
+    """
     to_subtract = start.weekday()
     start_of_week = (start - timedelta(days=to_subtract)).replace(hour=0, minute=0, second=0)
     # Энд округляем в потолок
-    to_add = 6 - end.weekday()
+    end_weekday = end.weekday()
+    to_add = 6 - end_weekday
+    if end_weekday in (4, 5, 6):
+        to_add += 7
     end_of_week = (end + timedelta(days=to_add)).replace(hour=23, minute=59, second=59)
     return front.IntervalSchema(start=start_of_week, end=end_of_week)
 
