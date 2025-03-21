@@ -30,8 +30,8 @@ def normalize(schedule: Schedule, tasks: list[BXTask]):
         task.time_estimate = int(time_estimate.total_seconds())
         if index == 0:
             start_date_plan = task.start_date_plan
-            if now < start_date_plan:
-                start_date_plan = now
+            # if now < start_date_plan:
+            #     start_date_plan = now
         else:
             prev_task = tasks[index - 1]
             start_date_plan = prev_task.end_date_plan
