@@ -72,7 +72,6 @@ class Schedule:
         # Отнимаем секунду, чтобы прошла проверка. 
         if total_delta == self.work_time_end:
             dt -= timedelta(seconds=1)
-            uvicorn_logger.info(str(dt))
         if total_delta > self.work_time_end:
             dt = self.get_nearest_datetime(dt) + (total_delta - self.work_time_end)  
         # Прибавляем дни по рабочим часам
