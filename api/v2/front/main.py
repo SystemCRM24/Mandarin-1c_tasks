@@ -38,6 +38,7 @@ async def handle_connection(socket: WebSocket):
     try:
         data = await fetch_websocket_data()
         if data is None:
+            await socket.close()
             raise WebSocketDisconnect
         await socket.send_text(data.model_dump_json())
         while True:
