@@ -1,26 +1,24 @@
-from os import environ
+from dotenv import dotenv_values
 from zoneinfo import ZoneInfo
 from aiocache import Cache
-import asyncio
+from asyncio import Event, Queue
 
 
-# Проверка на виртуальное окружение
-if environ.get('BITRIX_WEBHOOK') is None:
-    import dotenv
-    dotenv.load_dotenv()
+_values = dotenv_values()
+
 
 # Константы из виртуального окружения
-BITRIX_WEBHOOK = environ.get('BITRIX_WEBHOOK')
-DIRECTOR_ID = environ.get('DIRECTOR_ID')
-ONEC_GROUP_ID = environ.get('ONEC_GROUP_ID')
-UPLOAD_DIR_ID = environ.get('UPLOAD_DIR_ID')
-SCHEDULE_ID = environ.get('SCHEDULE_ID')
-DEPARTMENT_ID = environ.get('DEPARTMENT_ID')
-TIMEZONE_COMPENSATION = bool(environ.get('TIMEZONE_COMPENSATION'))
+BITRIX_WEBHOOK = _values.get('BITRIX_WEBHOOK')
+DIRECTOR_ID = _values.get('DIRECTOR_ID')
+ONEC_GROUP_ID = _values.get('ONEC_GROUP_ID')
+UPLOAD_DIR_ID = _values.get('UPLOAD_DIR_ID')
+SCHEDULE_ID = _values.get('SCHEDULE_ID')
+DEPARTMENT_ID = _values.get('DEPARTMENT_ID')
+TIMEZONE_COMPENSATION = _values.get('TIMEZONE_COMPENSATION') != '0'
 
 
 # Остальное
 MOSCOW_TZ = ZoneInfo('Europe/Moscow')
 CACHE = Cache()
-EVENT = asyncio.Event()     # Отслеживание изменений для фронта
-QUEUE = asyncio.Queue()     # Очередь для работы с событиями из битрикса.
+EVENT = Event()     # Отслеживание изменений для фронта
+QUEUE = Queue()     # Очередь для работы с событиями из битрикса.
