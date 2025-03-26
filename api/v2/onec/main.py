@@ -21,5 +21,5 @@ async def process_order(order: OrderSchema) -> list[ResponseItemSchema]:
         service.log_info(order, uploader, result)
         return result
     except Exception as exc: 
-        asyncio.create_task(utils.log_exception(exc))
+        asyncio.create_task(utils.log_exception(exc, "onec_order_process"))
         raise HTTPException(status_code=500, detail=str(exc))

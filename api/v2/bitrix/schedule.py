@@ -1,6 +1,5 @@
 import aiocache
 from datetime import datetime, timedelta
-from api.v2.utils import uvicorn_logger
 
 from .requests import get_work_schedule
 from ..constants import SCHEDULE_ID

@@ -2,6 +2,7 @@ import asyncio
 
 from fastapi import APIRouter, Request
 from api.v2.constants import QUEUE, EVENT
+from api.v2.utils import log_exception
 from .handler import task_update_handler
 
 
@@ -20,7 +21,10 @@ async def event_observer():
     """Прослушивает очередь и вызывает обработчик обновлений"""
     while True:
         task_id = await QUEUE.get()
-        await task_update_handler(task_id)
+        try:
+            await task_update_handler(task_id)
+        except Exception as exc:
+            asyncio.create_task(log_exception(exc, "bitrix_event_observer"))
         if QUEUE.empty():
             EVENT.set()
 

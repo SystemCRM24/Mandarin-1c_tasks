@@ -6,6 +6,7 @@ from api.v2 import constants
 from api.v2.schemas import front
 from api.v2.bitrix import requests, schedule
 from api.v2.service.funcs import get_bxtasks_from_user, get_bxtask_from_id, BXTask
+from api.v2.utils import log_exception
 
 
 async def fetch_websocket_data() -> front.WebSocketDataSchema:
@@ -116,9 +117,12 @@ async def generate_workdate_ranges(interval: front.IntervalSchema) -> list[front
 
 
 async def update_from_front_task(json_string: str):
-    task = front.FromFrontTaskSchema.model_validate_json(json_string)
-    bxtask: BXTask = await get_bxtask_from_id(task.id)
-    bxtask.responsible_id = task.resourceId
-    bxtask.start_date_plan = task.time.start.astimezone(constants.MOSCOW_TZ)
-    bxtask.end_date_plan = task.time.end.astimezone(constants.MOSCOW_TZ)
-    await bxtask.update()
+    try:
+        task = front.FromFrontTaskSchema.model_validate_json(json_string)
+        bxtask: BXTask = await get_bxtask_from_id(task.id)
+        bxtask.responsible_id = task.resourceId
+        bxtask.start_date_plan = task.time.start.astimezone(constants.MOSCOW_TZ)
+        bxtask.end_date_plan = task.time.end.astimezone(constants.MOSCOW_TZ)
+        await bxtask.update()
+    except Exception as exc:
+        asyncio.create_task(log_exception(exc, "frontend_update_from_websocket"))

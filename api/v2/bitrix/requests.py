@@ -5,7 +5,6 @@ from fast_bitrix24 import BitrixAsync
 import aiocache
 
 from api.v2 import constants
-from api.v2.utils import uvicorn_logger
 
 
 BX = BitrixAsync(constants.BITRIX_WEBHOOK)
