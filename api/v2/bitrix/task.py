@@ -127,6 +127,8 @@ class BXTask:
             if attr == 'webdav_files':
                 value = [f'n{file_id}' for file_id in value]
             if isinstance(value, datetime):
+                # if constants.TIMEZONE_COMPENSATION:
+                #     value += constants.MOSCOW_TZ.utcoffset(value)
                 value = value.isoformat()
             request[param] = value
         return request
