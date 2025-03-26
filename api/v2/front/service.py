@@ -89,9 +89,9 @@ async def generate_total_range(start: datetime, end: datetime) -> front.Interval
     # Энд округляем в потолок
     end_weekday = end.weekday()
     to_add = 6 - end_weekday
-    if end_weekday in (4, 5, 6):
-        to_add += 7
-    end_of_week = (end + timedelta(days=to_add)).replace(hour=23, minute=59, second=59)
+    # if end_weekday in (4, 5, 6):
+    #     to_add += 7
+    end_of_week = (end + timedelta(days=to_add + 7)).replace(hour=23, minute=59, second=59)
     return front.IntervalSchema(start=start_of_week, end=end_of_week)
 
 
