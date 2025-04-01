@@ -10,14 +10,17 @@ from api.v2.utils import log_exception
 
 
 async def fetch_websocket_data() -> front.WebSocketDataSchema:
+    now = datetime.now(constants.MOSCOW_TZ)
     resources_dct = await get_resources()
     start, end, tasks = await get_tasks(resources_dct)
-    if start is None or end is None:
-        return
+    if start is None:
+        start = now
+    if end is None:
+        end = now
     interval = await generate_total_range(start, end)
     ranges = await generate_workdate_ranges(interval)
     return front.WebSocketDataSchema(
-        now=datetime.now(constants.MOSCOW_TZ),
+        now=now,
         interval=interval,
         workIntervals=ranges,
         resources=list(resources_dct.values()),

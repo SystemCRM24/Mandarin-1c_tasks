@@ -18,9 +18,13 @@ async def update_event_observer():
         await EVENT.wait()
         try:
             data = await fetch_websocket_data()
-            json_string = data.model_dump_json()
-            coros = (s.send_text(json_string) for s in CONNECTIONS)
-            await asyncio.gather(*coros, return_exceptions=True)
+            if data is not None:
+                json_string = data.model_dump_json()
+                coros = (s.send_text(json_string) for s in CONNECTIONS)
+                await asyncio.gather(*coros, return_exceptions=True)
+            else:
+                for connect in CONNECTIONS:
+                    connect.
         except Exception as exc:
             asyncio.create_task(log_exception(exc, 'frontend_event_observer'))
         finally:
