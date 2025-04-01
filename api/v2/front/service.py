@@ -63,6 +63,7 @@ async def get_tasks(resources: dict[str, front.ResourceSchema]) -> tuple[str, st
     tasks = []
     first_task_start = last_task_end = None
     for user_tasks in tasks_by_user:
+        last_task: front.TaskSchema = None
         for task in user_tasks:
             if first_task_start is None or first_task_start > task.start_date_plan:
                 first_task_start = task.start_date_plan
@@ -78,6 +79,9 @@ async def get_tasks(resources: dict[str, front.ResourceSchema]) -> tuple[str, st
                     end=task.end_date_plan
                 )
             )
+            if last_task is not None and last_task.time.end != task_obj.time.start:
+                constants.QUEUE.put_nowait(task_obj.id)
+            last_task = task_obj
             tasks.append(task_obj)
     return first_task_start, last_task_end, tasks
 
