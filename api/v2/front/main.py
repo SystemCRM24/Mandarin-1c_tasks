@@ -18,13 +18,9 @@ async def update_event_observer():
         await EVENT.wait()
         try:
             data = await fetch_websocket_data()
-            if data is not None:
-                json_string = data.model_dump_json()
-                coros = (s.send_text(json_string) for s in CONNECTIONS)
-                await asyncio.gather(*coros, return_exceptions=True)
-            else:
-                for connect in CONNECTIONS:
-                    connect.
+            json_string = data.model_dump_json()
+            coros = (s.send_text(json_string) for s in CONNECTIONS)
+            await asyncio.gather(*coros, return_exceptions=True)
         except Exception as exc:
             asyncio.create_task(log_exception(exc, 'frontend_event_observer'))
         finally:
@@ -47,9 +43,6 @@ async def handle_connection(socket: WebSocket):
     CONNECTIONS.add(socket)
     try:
         data = await fetch_websocket_data()
-        if data is None:
-            await socket.close()
-            raise WebSocketDisconnect
         await socket.send_text(data.model_dump_json())
         while True:
             task = await socket.receive_text()
