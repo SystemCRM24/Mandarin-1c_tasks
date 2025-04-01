@@ -23,7 +23,8 @@ async def update_event_observer():
             await asyncio.gather(*coros, return_exceptions=True)
         except Exception as exc:
             asyncio.create_task(log_exception(exc, 'frontend_event_observer'))
-        EVENT.clear()
+        finally:
+            EVENT.clear()
 
 
 asyncio.create_task(update_event_observer())
