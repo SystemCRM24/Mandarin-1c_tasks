@@ -9,6 +9,14 @@ from api.v2.service.funcs import get_bxtasks_from_user, get_bxtask_from_id, BXTa
 from api.v2.utils import log_exception
 
 
+async def fetch_websocket_message() -> front.WebSocketMessageSchema:
+    data = await fetch_websocket_data()
+    return front.WebSocketMessageSchema(
+        meta='data',
+        content=data
+    )
+
+
 async def fetch_websocket_data() -> front.WebSocketDataSchema:
     now = datetime.now(constants.MOSCOW_TZ)
     resources_dct = await get_resources()
@@ -20,7 +28,6 @@ async def fetch_websocket_data() -> front.WebSocketDataSchema:
     interval = await generate_total_range(start, end)
     ranges = await generate_workdate_ranges(interval)
     return front.WebSocketDataSchema(
-        now=now,
         interval=interval,
         workIntervals=ranges,
         resources=list(resources_dct.values()),

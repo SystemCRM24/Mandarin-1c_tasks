@@ -1,7 +1,7 @@
 import asyncio
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
-from .service import fetch_websocket_data, update_from_front_task
+from .service import fetch_websocket_data, fetch_websocket_message, update_from_front_task
 from api.v2.constants import EVENT
 from api.v2.utils import log_exception
 
@@ -17,7 +17,7 @@ async def update_event_observer():
     while True:
         await EVENT.wait()
         try:
-            data = await fetch_websocket_data()
+            data = await fetch_websocket_message()
             json_string = data.model_dump_json()
             coros = (s.send_text(json_string) for s in CONNECTIONS)
             await asyncio.gather(*coros, return_exceptions=True)
@@ -42,7 +42,7 @@ async def handle_connection(socket: WebSocket):
     await socket.accept()
     CONNECTIONS.add(socket)
     try:
-        data = await fetch_websocket_data()
+        data = await fetch_websocket_message()
         await socket.send_text(data.model_dump_json())
         while True:
             task = await socket.receive_text()

@@ -35,8 +35,12 @@ class TaskSchema(BaseModel):
 
 class WebSocketDataSchema(BaseModel):
     """Схема ответа по WebSocket соединению"""
-    now: datetime
     interval: IntervalSchema
     workIntervals: list[IntervalSchema]
     resources: list[ResourceSchema]
     tasks: list[TaskSchema]
+
+
+class WebSocketMessageSchema(BaseModel):
+    meta: str
+    content: WebSocketDataSchema | bool
