@@ -16,15 +16,14 @@ async def update_event_observer():
     """Обработчик обновлений"""
     while True:
         await EVENT.wait()
+        EVENT.clear()
         try:
             data = await fetch_websocket_message()
             json_string = data.model_dump_json()
             coros = (s.send_text(json_string) for s in CONNECTIONS)
             await asyncio.gather(*coros, return_exceptions=True)
         except Exception as exc:
-            asyncio.create_task(log_exception(exc, 'frontend_event_observer'))
-        finally:
-            EVENT.clear()
+            asyncio.create_task(log_exception(exc, 'frontend_event_observer'))            
 
 
 asyncio.create_task(update_event_observer())
