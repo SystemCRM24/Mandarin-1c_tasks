@@ -22,7 +22,7 @@ async def trigger_ws_event() -> str:
     return 'Event was triggered'
 
 
-@router.post('upload_json', status_code=200)
+@router.post('/upload_json', status_code=200)
 async def upload_json(data: dict):
     """Загружает произвольный json-файл на диск битрикса"""
     json_string = json.dump(data, ensure_ascii=True, indent=2)
