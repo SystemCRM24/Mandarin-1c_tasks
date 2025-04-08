@@ -86,7 +86,6 @@ async def get_tasks(resources: dict[str, front.ResourceSchema]) -> tuple[str, st
                     end=task.end_date_plan
                 )
             )
-            last_task = task_obj
             tasks.append(task_obj)
     return first_task_start, last_task_end, tasks
 
