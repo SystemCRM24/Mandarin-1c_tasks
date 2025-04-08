@@ -1,5 +1,7 @@
 from fastapi import APIRouter, Request
 
+from api.utils.loggers import uvicorn_logger
+
 
 router = APIRouter(prefix='/bitrix')
 
@@ -14,7 +16,8 @@ async def on_task_create(request: Request):
 @router.post('/on_task_update', status_code=200)
 async def on_task_update(request: Request):
     """Ловим эвенты обновления задач"""
-    pass
+    form = await request.form()
+    uvicorn_logger.info(str(form))
     # async with request.form() as form:
     #     task_id = form.get('data[FIELDS_AFTER][ID]')
     # if task_id is not None:
