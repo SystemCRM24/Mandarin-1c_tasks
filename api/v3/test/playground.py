@@ -1,21 +1,32 @@
+from pathlib import Path
+import sys
 import asyncio
 
-class Test:
 
-    @classmethod
-    async def from_bitrix(cls, id):
-        await asyncio.sleep(1)
-        task = cls()
-        task.attr = id
-        return task
-    
-    def __init__(self):
-        self.attr = 1
-    
+parent = Path(__file__).parent.parent.parent.parent
+sys.path.append(str(parent))
+
+
+from api.v3.bitrix import requests
+
 
 async def main():
-    t = await Test.from_bitrix(2)
-    print(t.attr)
+    result = await requests.get_responsibles()
+    print(result)
 
 
 asyncio.run(main())
+
+
+# async def test():
+#     await asyncio.sleep(1)
+#     return 'Hello world!'
+
+# async def main():
+#     t = asyncio.create_task(test())
+#     result = await t
+#     result1 = await t
+#     print(result, result1)
+
+
+# asyncio.run(main())

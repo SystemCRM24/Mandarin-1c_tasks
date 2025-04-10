@@ -18,6 +18,8 @@ class OrderSchema(BaseModel):
         description="Дата, когда был заведен заказ в 1с"
     )
     assigner: str = Field(alias="Исполнитель")
+    counterparty: str = Field(alias="Контрагент")
+    manager: str = Field(alias="Менеджер")
     completed: bool = Field(alias="Выполнен")
     deadline: datetime = Field(alias="РекоммендуемаяДатаСдачи")
     acceptance: datetime = Field(

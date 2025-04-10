@@ -2,7 +2,7 @@ from typing import Self
 from datetime import datetime
 
 from api.v3 import constants
-from api.v3.bitrix.requests import get_task_info
+from api.v3.bitrix import requests
 
 
 class BXTask:
@@ -93,7 +93,7 @@ class BXTask:
     @classmethod
     async def from_bitrix(cls, task_id: str) -> Self:
         """Создает объект на основе информации из битрикса"""
-        task_dct = await get_task_info(task_id, cls.PARAM_BY_ATTR.values())
+        task_dct = await requests.get_task_info(task_id, cls.PARAM_BY_ATTR.values())
         return cls.from_bitrix_response(task_dct)
 
     @classmethod
@@ -124,6 +124,19 @@ class BXTask:
         task.webdav_files = response.get('ufTaskWebdavFiles', None)
         task._buffer.clear()
         return task
+    
+    def is_valid(self) -> bool:
+        """Валидация задачи"""
+        return all(self._is_valid())
+
+    def _is_valid(self):
+        yield bool(self.onec_id)
+        yield self.group_id == constants.ONEC_GROUP_ID
+        yield self.allow_time_tracking == 'Y'
+        yield isinstance(self.deadline, datetime)
+        yield isinstance(self.start_date_plan, datetime)
+        yield isinstance(self.end_date_plan, datetime)
+        yield isinstance(self.time_estimate, int)
 
     def get_request(self) -> dict | None:
         """Выдает словарь готового запроса по измененным атрибутам. Чистит буфер."""
@@ -144,3 +157,9 @@ class BXTask:
             request[param] = value
         self._buffer.clear()
         return request
+
+    def get_create_batch(self) -> str:
+        """Выдает батч на создание задачи"""
+
+    def get_update_batch(self) -> str:
+        """Выдает батч на обновление задачи"""

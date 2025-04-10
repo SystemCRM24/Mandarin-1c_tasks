@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Request
 
 from api.utils.loggers import uvicorn_logger
+from .pool import Pool
 
 
 router = APIRouter(prefix='/bitrix')

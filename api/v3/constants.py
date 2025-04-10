@@ -1,6 +1,5 @@
 from dotenv import dotenv_values
 from zoneinfo import ZoneInfo
-from aiocache import Cache
 from asyncio import Event, Queue
 
 
@@ -18,7 +17,6 @@ DEPARTMENT_ID = _values.get('DEPARTMENT_ID')
 
 # Остальное
 MOSCOW_TZ = ZoneInfo('Europe/Moscow')
-CACHE = Cache()         # Кеш для запросов к битриксу и внутренних функций
 QUEUE = Queue()         # Очередь для работы с событиями из битрикса.
 DATA_EVENT = Event()    # Для отправки фронту данных
 SYNC_EVENT = Event()    # Для отправки фронту события синхронизации
