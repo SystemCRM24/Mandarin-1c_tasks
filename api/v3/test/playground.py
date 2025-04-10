@@ -11,7 +11,7 @@ from api.v3.bitrix import requests
 
 
 async def main():
-    result = await requests.get_responsibles()
+    result = await requests.get_task_info(2035)
     print(result)
 
 

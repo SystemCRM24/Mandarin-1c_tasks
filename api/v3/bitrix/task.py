@@ -107,7 +107,8 @@ class BXTask:
         task.status = response.get('status', None)
         task.group_id = response.get('groupId', None)
         task.allow_time_tracking = response.get('allowTimeTracking', None)
-        task.last_update = response.get('ufAuto261370983936', None)
+        last_update: str = response.get('ufAuto261370983936', '')
+        task.last_update = int(last_update) if last_update.isdigit() else None
         task.assigner_id = response.get('createdBy', None)
         task.responsible_id = response.get('responsibleId', None)
         task.title = response.get('title', None)
@@ -133,6 +134,7 @@ class BXTask:
         yield bool(self.onec_id)
         yield self.group_id == constants.ONEC_GROUP_ID
         yield self.allow_time_tracking == 'Y'
+        yield isinstance(self.last_update, int)
         yield isinstance(self.deadline, datetime)
         yield isinstance(self.start_date_plan, datetime)
         yield isinstance(self.end_date_plan, datetime)
@@ -161,5 +163,9 @@ class BXTask:
     def get_create_batch(self) -> str:
         """Выдает батч на создание задачи"""
 
-    def get_update_batch(self) -> str:
+    def get_update_batch(self) -> str | None:
         """Выдает батч на обновление задачи"""
+        if self._buffer:
+            timestamp = datetime.now(constants.MOSCOW_TZ).timestamp()
+            self.last_update = int(timestamp)
+        request = self.get_request()
