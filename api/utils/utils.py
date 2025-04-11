@@ -17,8 +17,6 @@ class BatchBuilder:
     def __init__(self, method: str, params: dict | None = None):
         self.method = method
         self.params = params or {}
-        if method.startswith('tasks'):
-            uvicorn_logger.info(str(self.params))
     
     def build(self) -> str:
         """Возвращает батч-запрос в виде строки"""
