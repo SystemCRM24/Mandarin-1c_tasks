@@ -109,8 +109,8 @@ class TasksHandler:
     async def process(self) -> list[TaskItemSchema]:
         """Обрабатывает задачи"""
         calc_by_onec_id = {get_onec_id(self.order, c): c for c in self.order.calculation}
-        filter = {f'@{BXTask.PARAM_BY_ATTR['onec_id']}': list[calc_by_onec_id]}
-        response = await requests.get_tasks_list(filter)
+        filter_for_tasks = {f'@{BXTask.PARAM_BY_ATTR['onec_id']}': list(calc_by_onec_id)}
+        response = await requests.get_tasks_list(filter_for_tasks)
         await self._match_handler(calc_by_onec_id, response)
         await self._send_batch()
         return [h.response for h in self.handlers]
