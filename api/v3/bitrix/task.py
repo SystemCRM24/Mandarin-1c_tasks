@@ -73,7 +73,7 @@ class BXTask:
     def __setattr__(self, name, value):
         old_value = getattr(self, name, None)
         super().__setattr__(name, value)
-        if name != '_updated' and old_value != value:
+        if name != '_buffer' and old_value != value:
             self._buffer.add(name)
     
     def __str__(self):
