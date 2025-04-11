@@ -152,3 +152,5 @@ class Pool:
             batch_list.append(batch)
             constants.TO_AVOID[task.id] = task.last_update
         return batch_list
+
+Pool()
