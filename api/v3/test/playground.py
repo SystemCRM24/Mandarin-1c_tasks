@@ -7,16 +7,15 @@ parent = Path(__file__).parent.parent.parent.parent
 sys.path.append(str(parent))
 
 
-from api.v3.bitrix import requests
 from api.v3.bitrix.pool import Pool
+from api.v3.front.service import fetch_websocket_message
 
 
 async def main():
     pool = Pool()
     await pool.fill()
-    result = pool._get_tasks_by_department()
+    result = await fetch_websocket_message()
     print(result)
-
 
 asyncio.run(main())
 

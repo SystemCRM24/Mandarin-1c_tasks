@@ -1,9 +1,73 @@
-from fastapi import APIRouter
+import asyncio
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+
+from api.utils import log_exception
+from .service import fetch_websocket_message
+from api.v3 import constants
+from api.v3.schemas.front import SyncSchema
 
 
 router = APIRouter(prefix='/front')
 
+CONNECTIONS: set[WebSocket] = set()
+
+
+@router.websocket('/ws')
+async def handle_connection(socket: WebSocket):
+    """Обработка подключений"""
+    await socket.accept()
+    CONNECTIONS.add(socket)
+    try:
+        data = await fetch_websocket_message()
+        await socket.send_text(data.model_dump_json())
+        while True:
+            await socket.receive_text()
+    except WebSocketDisconnect:
+        CONNECTIONS.discard(socket)
+
+
+async def send_message(message: str):
+    """Посылает сообщения всем соединениям"""
+    try:
+        coros = (s.send_text(message) for s in CONNECTIONS)
+        await asyncio.gather(*coros)
+    except Exception as exc:
+        asyncio.create_task(log_exception(exc, 'send_websocker_message')) 
+
 
 @router.get('/fetch_data', status_code=200)
 async def fetch_data():
-    pass
+    return await fetch_websocket_message()
+
+
+async def start_sync_observer():
+    """Наблюдающий за началом синхронизации задач"""
+    while True:
+        await constants.START_SYNC.wait()
+        constants.START_SYNC.clear()
+        message = SyncSchema(content=True)
+        await send_message(message.model_dump_json())
+
+asyncio.create_task(start_sync_observer())
+
+
+async def end_sync_observer():
+    """Наблюдающий за окончанием синхронизации задач"""
+    while True:
+        await constants.END_SYNC.wait()
+        constants.END_SYNC.clear()
+        message = SyncSchema(content=False)
+        await send_message(message.model_dump_json())
+
+asyncio.create_task(end_sync_observer())
+
+
+async def data_event_observer():
+    """Наблюдающий за эвентом отправки данных"""
+    while True:
+        await constants.DATA_EVENT.wait()
+        constants.DATA_EVENT.clear()
+        message = await fetch_websocket_message()
+        await send_message(message.model_dump_json())
+
+asyncio.create_task(data_event_observer())
