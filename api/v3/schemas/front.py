@@ -13,8 +13,9 @@ class TaskSchema(BaseModel):
     id: str | int
     label: str
     resourceId: str | int
-    time: IntervalSchema
+    description: str
     deadline: datetime
+    time: IntervalSchema
 
 
 class ResourceSchema(BaseModel):

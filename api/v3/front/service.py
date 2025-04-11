@@ -52,6 +52,7 @@ def fetch_tasks() -> tuple[datetime, datetime, list[front.TaskSchema]]:
                 label=task.title,
                 resourceId=task.responsible_id,
                 deadline=task.deadline,
+                description=task.description,
                 time=front.IntervalSchema(
                     start=task.start_date_plan,
                     end=task.end_date_plan
