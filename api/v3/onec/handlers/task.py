@@ -2,6 +2,7 @@ import asyncio
 from datetime import datetime
 from typing import Self
 
+from api.utils.loggers import uvicorn_logger
 from api.v3 import constants
 from api.v3.bitrix import requests
 from api.v3.bitrix.task import BXTask
@@ -136,6 +137,7 @@ class TasksHandler:
     async def _send_batch(self):
         """Посылает батчи"""
         batches = [h.batch for h in self.handlers]
+        uvicorn_logger.info(str(batches))
         response: list[dict] = await requests.call_batch(batches)
         for index, task in enumerate(response):
             handler = self.handlers[index]
