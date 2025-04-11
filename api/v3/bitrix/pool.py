@@ -23,6 +23,7 @@ class Pool:
             self._tasks: dict[str, BXTask] = {}
             self._responsibles: dict[str, dict] = {}
             self._schedule: Schedule = None
+            asyncio.create_task(self.fill())
 
     async def fill(self):
         """Заполняет бассейн актуальными задачами"""
@@ -151,7 +152,3 @@ class Pool:
             batch_list.append(batch)
             constants.TO_AVOID[task.id] = task.last_update
         return batch_list
-
-
-p = Pool()
-# asyncio.create_task(p.fill())
