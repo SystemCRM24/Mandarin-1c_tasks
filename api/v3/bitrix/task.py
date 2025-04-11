@@ -45,6 +45,8 @@ class BXTask:
         'end_date_plan': 'END_DATE_PLAN',
         'time_estimate': 'TIME_ESTIMATE',
     }
+
+    _PLAN_ATTRS = set(('start_date_plan', 'end_date_plan'))
     
     def __init__(self):
         # Идешники задачи
@@ -140,13 +142,12 @@ class BXTask:
         """Выдает словарь готового запроса по измененным атрибутам. Чистит буфер."""
         if not self._buffer:
             return None
-        plan_attrs = ('start_date_plan', 'end_date_plan')
-        for index, plan_attr in enumerate(plan_attrs):
-            if plan_attr in self._buffer:
-                self._buffer.add(plan_attrs[not index])
+        if self._buffer & self._PLAN_ATTRS:
+            self._buffer.update(self._PLAN_ATTRS)
         request = {}
-        for attr in self._buffer:
-            param = self.PARAM_BY_ATTR.get(attr, None)
+        for attr, param in self.PARAM_BY_ATTR.items():
+            if attr not in self._buffer:
+                continue
             value = getattr(self, attr)
             if isinstance(value, datetime):
                 value = value.isoformat()
