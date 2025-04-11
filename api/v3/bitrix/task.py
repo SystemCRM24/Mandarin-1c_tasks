@@ -90,7 +90,7 @@ class BXTask:
     @classmethod
     async def from_bitrix(cls, task_id: str) -> Self:
         """Создает объект на основе информации из битрикса"""
-        task_dct = await requests.get_task_info(task_id, cls.PARAM_BY_ATTR.values())
+        task_dct = await requests.get_task_info(task_id)
         return cls.from_bitrix_response(task_dct)
 
     @classmethod
