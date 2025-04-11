@@ -28,7 +28,7 @@ class TaskHandler:
     async def create(self) -> Self:
         bx_task = self.bx_task = BXTask()
         bx_task.onec_id = get_onec_id(self.order, self.calculation)
-        bx_task.group_id = constants.ONEC_GROUP_ID,
+        bx_task.group_id = constants.ONEC_GROUP_ID
         bx_task.allow_time_tracking = 'Y'
         bx_task.assigner_id = await self.select_assigner()
         responsible, start_time = await self.select_responsible()

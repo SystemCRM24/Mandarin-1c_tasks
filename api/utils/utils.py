@@ -1,6 +1,7 @@
 from datetime import datetime
 import traceback
 from zoneinfo import ZoneInfo
+from urllib.parse import quote as url_quote
 
 from .loggers import uvicorn_logger, debug_logger
 
@@ -28,9 +29,9 @@ class BatchBuilder:
                     batch += self._get_subbatch_from_dict(cmd, params)
                 case tuple() | list() as params:
                     batch += self._get_subbatch_from_iterable(cmd, params)
-                case param:
-                    batch += f'&{cmd}={param}'
-        return batch
+                case params:
+                    batch += self._get_subbatch(cmd, params)
+        return url_quote(batch)
 
     @staticmethod
     def _get_subbatch_from_dict(cmd, params: dict) -> str:
@@ -46,6 +47,12 @@ class BatchBuilder:
         subbatch = ''
         for index, value in enumerate(params):
             subbatch += f'&{cmd}[{index}]={value}'
+        return subbatch
+
+    @staticmethod
+    def _get_subbatch(cmd, params: int | float | str) -> str:
+        """Возвращает подзапрос для этих типов данных"""
+        subbatch = f'&{cmd}={params}'
         return subbatch
 
 
