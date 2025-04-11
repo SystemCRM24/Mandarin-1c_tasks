@@ -135,8 +135,8 @@ class TasksHandler:
 
     async def _send_batch(self):
         """Посылает батчи"""
-        requests = [h.batch for h in self.handlers]
-        response: list[dict] = await requests.call_batch(requests)
+        batches = [h.batch for h in self.handlers]
+        response: list[dict] = await requests.call_batch(batches)
         for index, task in enumerate(response):
             handler = self.handlers[index]
             handler.response.id = task.get('id')
