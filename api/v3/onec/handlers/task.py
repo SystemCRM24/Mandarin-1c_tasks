@@ -22,7 +22,7 @@ class TaskHandler:
         self.pool = Pool()
         self.bx_task: BXTask = None
         self.batch = ''
-        self.response = TaskItemSchema(self.calculation.position)
+        self.response = TaskItemSchema(position=self.calculation.position)
     
     async def create(self) -> Self:
         bx_task = self.bx_task = BXTask()
