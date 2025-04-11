@@ -29,13 +29,14 @@ class BatchBuilder:
                     batch += self._get_subbatch_from_iterable(cmd, params)
                 case params:
                     batch += self._get_subbatch(cmd, params)
-        return url_quote(batch)
+        return batch
 
     @staticmethod
     def _get_subbatch_from_dict(cmd, params: dict) -> str:
         """Возвращает подзапрос для словарей"""
         subbatch = ''
         for key, value in params.items():
+            value = url_quote(str(value))
             subbatch += f'&{cmd}[{key}]={value}'
         return subbatch
     
@@ -44,12 +45,14 @@ class BatchBuilder:
         """Возвращает подзапрос для словарей"""
         subbatch = ''
         for index, value in enumerate(params):
+            value = url_quote(str(value))
             subbatch += f'&{cmd}[{index}]={value}'
         return subbatch
 
     @staticmethod
     def _get_subbatch(cmd, params: int | float | str) -> str:
         """Возвращает подзапрос для этих типов данных"""
+        params = url_quote(str(params))
         subbatch = f'&{cmd}={params}'
         return subbatch
 

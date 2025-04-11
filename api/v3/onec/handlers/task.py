@@ -137,7 +137,6 @@ class TasksHandler:
     async def _send_batch(self):
         """Посылает батчи"""
         batches = [h.batch for h in self.handlers]
-        uvicorn_logger.info(str(batches))
         response: list[dict] = await requests.call_batch(batches)
         for index, task in enumerate(response):
             handler = self.handlers[index]
