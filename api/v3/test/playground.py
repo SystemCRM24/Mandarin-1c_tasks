@@ -8,10 +8,13 @@ sys.path.append(str(parent))
 
 
 from api.v3.bitrix import requests
+from api.v3.bitrix.pool import Pool
 
 
 async def main():
-    result = await requests.get_task_info(2035)
+    pool = Pool()
+    await pool.fill()
+    result = pool._get_tasks_by_department()
     print(result)
 
 

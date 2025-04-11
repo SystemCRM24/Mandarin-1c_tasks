@@ -85,3 +85,15 @@ async def get_users(departments: dict) -> list[dict]:
     }
     response: list[dict] = await BX.get_all(method='user.get', params=params)
     return response
+
+
+manager_cache = aiocache.cached(ttl=60 * 60 * 4, namespace='department')
+
+@manager_cache
+async def get_manager(full_name: str) -> str | None:
+    """Возвращает id менеджера или None, если менеджер не найден"""
+    name_list = full_name.split(' ')
+    to_search = ' '.join(name_list[:2])
+    response = await BX.call(method='user.get', items={'NAME_SEARCH': to_search})
+    if isinstance(response, dict):
+        return response.get('ID', None)

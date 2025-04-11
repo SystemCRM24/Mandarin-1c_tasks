@@ -2,6 +2,7 @@ from typing import Self
 from datetime import datetime
 
 from api.v3 import constants
+from api.utils import BatchBuilder, SERVER_TZ
 from api.v3.bitrix import requests
 
 
@@ -24,7 +25,6 @@ class BXTask:
         'start_date_plan',
         'end_date_plan',
         'time_estimate',
-        'webdav_files',
         '_buffer'
     )
 
@@ -44,7 +44,6 @@ class BXTask:
         'start_date_plan': 'START_DATE_PLAN',
         'end_date_plan': 'END_DATE_PLAN',
         'time_estimate': 'TIME_ESTIMATE',
-        'webdav_files': 'UF_TASK_WEBDAV_FILES',
     }
     
     def __init__(self):
@@ -68,8 +67,6 @@ class BXTask:
         self.start_date_plan = None
         self.end_date_plan = None
         self.time_estimate = None   # Время в секундах
-        # Прикрепленные файлы
-        self.webdav_files = None
         # Множество для отслеживания изменения атрибутов
         self._buffer = set()
     
@@ -107,7 +104,7 @@ class BXTask:
         task.status = response.get('status', None)
         task.group_id = response.get('groupId', None)
         task.allow_time_tracking = response.get('allowTimeTracking', None)
-        last_update: str = response.get('ufAuto261370983936', '')
+        last_update: str = response.get('ufAuto261370983936', None) or ''
         task.last_update = int(last_update) if last_update.isdigit() else None
         task.assigner_id = response.get('createdBy', None)
         task.responsible_id = response.get('responsibleId', None)
@@ -122,7 +119,6 @@ class BXTask:
         end_date_plan = response.get('endDatePlan', None)
         task.end_date_plan = cls.parse_bitrix_date(end_date_plan)
         task.time_estimate = int(response.get('timeEstimate', 0))
-        task.webdav_files = response.get('ufTaskWebdavFiles', None)
         task._buffer.clear()
         return task
     
@@ -132,9 +128,9 @@ class BXTask:
 
     def _is_valid(self):
         yield bool(self.onec_id)
+        yield isinstance(self.last_update, int)
         yield self.group_id == constants.ONEC_GROUP_ID
         yield self.allow_time_tracking == 'Y'
-        yield isinstance(self.last_update, int)
         yield isinstance(self.deadline, datetime)
         yield isinstance(self.start_date_plan, datetime)
         yield isinstance(self.end_date_plan, datetime)
@@ -154,18 +150,27 @@ class BXTask:
             value = getattr(self, attr)
             if isinstance(value, datetime):
                 value = value.isoformat()
-            if attr == 'webdav_files':
-                value = [f'n{file_id}' for file_id in value]
             request[param] = value
         self._buffer.clear()
         return request
 
     def get_create_batch(self) -> str:
         """Выдает батч на создание задачи"""
+        request = self.get_request()
+        batch = BatchBuilder(method='tasks.task.add', params={'fields': request})
+        return batch.build()
 
     def get_update_batch(self) -> str | None:
         """Выдает батч на обновление задачи"""
-        if self._buffer:
-            timestamp = datetime.now(constants.MOSCOW_TZ).timestamp()
-            self.last_update = int(timestamp)
+        if not self._buffer:
+            return None
+        self.mark_timestamp()
         request = self.get_request()
+        params = {'taskId': self.id, 'fields': request}
+        batch = BatchBuilder(method='tasks.task.update', params=params)
+        return batch.build()
+
+    def mark_timestamp(self):
+        """Обновляет атрибут last_update штампом времени, соответствующий сейчас по серверному времени"""
+        timestamp = datetime.now(SERVER_TZ).timestamp()
+        self.last_update = int(timestamp)

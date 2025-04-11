@@ -18,5 +18,7 @@ DEPARTMENT_ID = _values.get('DEPARTMENT_ID')
 # Остальное
 MOSCOW_TZ = ZoneInfo('Europe/Moscow')
 QUEUE = Queue()         # Очередь для работы с событиями из битрикса.
-DATA_EVENT = Event()    # Для отправки фронту данных
-SYNC_EVENT = Event()    # Для отправки фронту события синхронизации
+START_SYNC = Event()    # Сигнал о начале синхронизации бассейна
+END_SYNC = Event()      # Сигнал об окончании синхронизации бассейна
+DATA_EVENT = Event()    # Сигнал на отправку данных на фронт
+TO_AVOID: dict[str, int] = {}
