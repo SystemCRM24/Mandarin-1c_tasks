@@ -56,6 +56,5 @@ class FileHandler:
                 params = {'taskId': handler.bx_task.id, 'fileId': file_id}
                 batch = BatchBuilder('tasks.task.files.attach', params)
                 requests.append(batch.build())
-        response = await call_batch(requests)
-        uvicorn_logger.info(str(response))
+        await call_batch(requests)
         uvicorn_logger.info(f'Files attached to order={self.order.name} tasks.')

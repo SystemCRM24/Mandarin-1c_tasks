@@ -22,5 +22,6 @@ async def log_onec_request(request: OrderSchema, response: ResponseSchema):
         request=request,
         response=response
     )
-    with open(f'logs/{now.strftime(r'%Y-%m-%d_%H-%M-%S')}_{request.name}.json', 'w') as file:
-        file.write(log.model_dump_json(indent=2))
+    with open(f'logs/{now.strftime(r'%Y-%m-%d_%H-%M-%S')}_{request.name}.json', 'wb') as file:
+        json_string = log.model_dump_json(indent=2)
+        file.write(json_string.encode('utf-8'))
