@@ -74,7 +74,7 @@ class Pool:
         """Обновляет задачу в бассейне"""
         if bxtask.id in self._tasks:
             async with self.__lock:
-                self._tasks[bxtask.id] = bxtask.id
+                self._tasks[bxtask.id] = bxtask
             uvicorn_logger.info(f'-- Task (id={bxtask.id}) was update. --')
             asyncio.create_task(self.recalculate())
         else:
