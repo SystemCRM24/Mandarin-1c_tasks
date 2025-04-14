@@ -8,24 +8,46 @@ from api.v3.bitrix import requests
 from api.v3.bitrix.task import BXTask
 from api.v3.bitrix.pool import Pool
 from api.v3.schemas.onec import OrderSchema, CalculationItemSchema, TaskItemSchema
-
-
-def get_onec_id(order: OrderSchema, calculation: CalculationItemSchema) -> str:
-    """Возвращает идентификатор для задачи"""
-    return f'{order.id}:{calculation.position}'
+from .service import get_onec_id
 
 
 class TaskHandler:
+    pool = Pool()
+
+    @classmethod
+    def from_bx_task(
+        cls, 
+        order: OrderSchema, 
+        calculation: CalculationItemSchema,
+        bx_task_dct: dict
+    ) -> Self:
+        """Создает объект на основе запроса из битрикса"""
+        handler = cls(order, calculation)
+        handler.bx_task = BXTask.from_bitrix_response(bx_task_dct)
+        handler.for_create = False
+        handler.response.id = handler.bx_task.id
+        return handler
 
     def __init__(self, order: OrderSchema, calculation: CalculationItemSchema):
         self.order = order
         self.calculation = calculation
-        self.pool = Pool()
+        self.for_create = True
         self.bx_task: BXTask = None
-        self.batch = ''
-        self.response = TaskItemSchema(position=self.calculation.position)
+        self.response = TaskItemSchema(position=calculation.position)
     
-    async def create(self) -> Self:
+    async def process(self):
+        """Обработка задачи"""
+        if self.for_create:
+            return await self.create()
+        return await self.update()
+    
+    def get_batch(self) -> str | None:
+        """Выдает батч для создания/обновления задачи или None"""
+        if self.for_create:
+            return self.bx_task.get_create_batch()
+        return self.bx_task.get_update_batch()
+    
+    async def create(self) -> str:
         bx_task = self.bx_task = BXTask()
         bx_task.onec_id = get_onec_id(self.order, self.calculation)
         bx_task.group_id = constants.ONEC_GROUP_ID
@@ -38,22 +60,21 @@ class TaskHandler:
         bx_task.created_date = self.order.acceptance
         bx_task.deadline = self.order.deadline
         bx_task.start_date_plan = start_time
-        bx_task.end_date_plan = self.pool._schedule.add_duration(start_time, self.calculation.time)
+        edp = self.pool._schedule.add_duration(start_time, self.calculation.time)
+        bx_task.end_date_plan = edp
         bx_task.time_estimate = self.calculation.time
-        self.batch = bx_task.get_create_batch()
-        return self
+        self._update_response_message('Задача создана.')
 
-    async def update(self, task_dct: dict) -> Self:
-        bx_task = self.bx_task = BXTask.from_bitrix_response(task_dct)
+    async def update(self) -> str | None:
         if self.order.completed:
-            bx_task.status = '5'   # выполнен
-        bx_task.assigner_id = await self.select_assigner()
-        bx_task.description = self.get_description()
-        bx_task.deadline = self.order.deadline
-        bx_task.time_estimate = self.calculation.time
-        bx_task.end_date_plan = self.pool._schedule.add_duration(bx_task.start_date_plan, bx_task.time_estimate)
-        self.batch = bx_task.get_update_batch()
-        return self
+            self.bx_task.status = '5'   # выполнен
+        self.bx_task.assigner_id = await self.select_assigner()
+        self.bx_task.description = self.get_description()
+        self.bx_task.deadline = self.order.deadline
+        self.bx_task.time_estimate = self.calculation.time
+        edp = self.pool._schedule.add_duration(self.bx_task.start_date_plan, self.bx_task.time_estimate)
+        self.bx_task.end_date_plan = edp
+        self._update_response_message('Задача обновлена.')
 
     async def select_assigner(self) -> str:
         """Определяет Постановщика"""
@@ -98,47 +119,3 @@ class TaskHandler:
         if self.response.message:
             message = ' ' + message
         self.response.message += message
-
-
-class TasksHandler:
-    """Обработка задач: Постановка или обновление"""
-
-    def __init__(self, order: OrderSchema):
-        self.order = order
-        self.handlers: list[TaskHandler] = []
-    
-    async def process(self) -> list[TaskItemSchema]:
-        """Обрабатывает задачи"""
-        calc_by_onec_id = {get_onec_id(self.order, c): c for c in self.order.calculation}
-        filter_for_tasks = {f'@{BXTask.PARAM_BY_ATTR['onec_id']}': list(calc_by_onec_id)}
-        response = await requests.get_tasks_list(filter_for_tasks)
-        await self._match_handler(calc_by_onec_id, response)
-        await self._send_batch()
-        return [h.response for h in self.handlers]
-
-    async def _match_handler(self, calc_by_onec_id: dict, response: list[dict]):
-        """Разделяет задачи на создание и обновление"""
-        pool = Pool()
-        await pool.update_context()
-        coros = []
-        # Пошло на обновление
-        for task_dct in response:
-            onec_id = task_dct.get('ufAuto151992241453', '')
-            calculation = calc_by_onec_id.pop(onec_id)
-            task_handler = TaskHandler(self.order, calculation)
-            coros.append(task_handler.update(task_dct))
-        # Пошло на создание
-        for calculation in calc_by_onec_id.values():
-            task_handler = TaskHandler(self.order, calculation)
-            coros.append(task_handler.create())
-        handlers = await asyncio.gather(*coros)
-        self.handlers.extend(handlers)
-
-    async def _send_batch(self):
-        """Посылает батчи"""
-        batches = [h.batch for h in self.handlers]
-        response: list[dict] = await requests.call_batch(batches)
-        uvicorn_logger.info(str(response))
-        for index, task in enumerate(response):
-            handler = self.handlers[index]
-            handler.response.id = task.get('id')

@@ -1,0 +1,38 @@
+{
+  "time": "2025-04-14T12:48:11.391338+03:00",
+  "request": {
+    "id": "d8021b2c-0be0-11f0-bedc-00e84c68b822",
+    "name": "РА-00000961",
+    "date": "2025-04-02T21:27:49+03:00",
+    "assigner": "Производство",
+    "counterparty": "Баронов Антон Сергеевич",
+    "manager": "Кордунова Светлана Игоревна",
+    "completed": false,
+    "deadline": "2025-04-10T00:00:00+03:00",
+    "acceptance": "2025-04-10T00:00:00+03:00",
+    "calculation": [
+      {
+        "position": "Макетчик",
+        "position_id": "878944cb-75a2-47d4-8b62-1f2fd573aabd",
+        "time": 46500,
+        "amount": 3143.28
+      }
+    ],
+    "files": [
+      {
+        "name": "9bcb92aa-e971-4cc4-9afa-8da67c847909.jpg",
+        "binary": "/9j/4AAQSkZJRgABAQEAYABgAAD/4QDoRXhpZgAA(...)"
+      }
+    ]
+  },
+  "response": {
+    "order": "РА-00000961",
+    "tasks": [
+      {
+        "position": "Макетчик",
+        "id": "2244",
+        "message": "Задача обновлена."
+      }
+    ]
+  }
+}

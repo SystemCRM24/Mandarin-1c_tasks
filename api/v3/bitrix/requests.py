@@ -9,7 +9,7 @@ from api.v3 import constants
 from .task import BXTask
 
 
-BX = BitrixAsync(constants.BITRIX_WEBHOOK)
+BX = BitrixAsync(constants.BITRIX_WEBHOOK, verbose=False)
 
 
 async def call_batch(requests: Iterable) -> dict:
