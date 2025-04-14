@@ -1,8 +1,6 @@
-import asyncio
 from datetime import datetime
 from typing import Self
 
-from api.utils.loggers import uvicorn_logger
 from api.v3 import constants
 from api.v3.bitrix import requests
 from api.v3.bitrix.task import BXTask

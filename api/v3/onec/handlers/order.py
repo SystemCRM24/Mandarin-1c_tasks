@@ -69,4 +69,4 @@ class OrderHandler:
                 task_id = task_dct.get('id')
                 handler.bx_task.id = task_id
                 handler.response.id = task_id
-        uvicorn_logger.info(f'Handled {len(batch_values)} tasks of order={self.order.name}')
+        uvicorn_logger.info(f'-- Handled {len(batch_values)} tasks of order={self.order.name} --')

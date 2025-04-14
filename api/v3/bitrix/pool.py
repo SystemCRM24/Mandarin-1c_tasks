@@ -33,7 +33,7 @@ class Pool:
                 self._update_responsibles(),
                 self._update_schedule()
             )
-        uvicorn_logger.info(f'Pool was filled with {len(self._tasks)} tasks.')
+        uvicorn_logger.info(f'-- Pool was filled with {len(self._tasks)} tasks. --')
     
     async def update_context(self):
         """Обновляет контекст: пользователей и расписание"""
@@ -67,7 +67,7 @@ class Pool:
         """Добавляет задачу в бассейн"""
         async with self.__lock:
             self._tasks[bxtask.id] = bxtask
-        uvicorn_logger.info(f'The new task (id={bxtask.id}) has been added to the Pool.')
+        uvicorn_logger.info(f'-- The new task (id={bxtask.id}) has been added to the Pool. --')
         asyncio.create_task(self.recalculate())
     
     async def update(self, bxtask: BXTask):
@@ -75,20 +75,20 @@ class Pool:
         if bxtask.id in self._tasks:
             async with self.__lock:
                 self._tasks[bxtask.id] = bxtask.id
-            uvicorn_logger.info(f'Task (id={bxtask.id}) was update.')
+            uvicorn_logger.info(f'-- Task (id={bxtask.id}) was update. --')
             asyncio.create_task(self.recalculate())
         else:
-            uvicorn_logger.info(f'Task (id={bxtask.id}) not in pool.')
+            uvicorn_logger.info(f'-- Task (id={bxtask.id}) not in pool. --')
 
     async def delete(self, task_id: str):
         """Удаляет задачу из бассейна"""
         if task_id in self._tasks:
             async with self.__lock:
                 self._tasks.pop(task_id, None)
-            uvicorn_logger.info(f'Task (id={task_id}) was delete from the Pool.')
+            uvicorn_logger.info(f'-- Task (id={task_id}) was delete from the Pool. --')
             asyncio.create_task(self.recalculate())
         else:
-            uvicorn_logger.info(f'Task (id={task_id}) not in pool.')
+            uvicorn_logger.info(f'-- Task (id={task_id}) not in pool. --')
 
     async def recalculate(self):
         """Перерасчет задач в бассейне"""
@@ -102,7 +102,7 @@ class Pool:
             batch_list = self._get_batch_list()
             if len(batch_list) > 0:
                 asyncio.create_task(requests.call_batch(batch_list))
-                uvicorn_logger.info(f'Pool recalculate {len(batch_list)} tasks')
+                uvicorn_logger.info(f'-- Pool recalculate {len(batch_list)} tasks --')
 
     def _get_tasks_by_responsibles(self) -> dict[str, list[BXTask]]:
         """Выдает задачи распределенные по пользователям"""

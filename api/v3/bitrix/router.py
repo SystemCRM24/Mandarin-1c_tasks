@@ -32,7 +32,7 @@ async def on_task_create(request: Request):
     if bxtask is not None:
         bxtask.mark_timestamp()
     if bxtask is None or not bxtask.is_valid():
-        uvicorn_logger.info(f'Task id={task_id} is not valid.')
+        uvicorn_logger.info(f'-- Task id={task_id} is not valid. --')
         return
     pool = Pool()
     aiotask = asyncio.create_task(pool.add(bxtask))
@@ -44,12 +44,12 @@ async def on_task_update(request: Request):
     """Ловим эвенты обновления задач"""
     task_id, bxtask = await get_bxtask_from_form(request)
     if bxtask is None or not bxtask.is_valid():
-        uvicorn_logger.info(f'Task id={task_id} is not valid.')
+        uvicorn_logger.info(f'-- Task id={task_id} is not valid. --')
         return
     task_last_update = constants.TO_AVOID.get(task_id, 0)
     if bxtask.last_update == task_last_update:
         constants.TO_AVOID.pop(bxtask.id, None)
-        uvicorn_logger.info(f'The update event for the task (id={bxtask.id}) was avoided.')
+        uvicorn_logger.info(f'-- The update event for the task (id={bxtask.id}) was avoided. --')
         return
     pool = Pool()
     if bxtask.status == '5':
