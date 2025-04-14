@@ -6,8 +6,7 @@ from urllib.parse import unquote
 class FileItemSchema(BaseModel):
     """Схема прилагаемых файлов"""
     name: str = Field(alias="Имя")
-    binary: str = Field(alias="ДвоичныеДанные", exclude=True)
-    bx_id: int | None = None
+    binary: str = Field(alias="ДвоичныеДанные")
 
     @field_validator('binary', mode='after')
     @classmethod
