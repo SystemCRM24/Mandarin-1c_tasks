@@ -150,7 +150,7 @@ class Pool:
             if batch is None:
                 continue
             batch_list.append(batch)
-            constants.TO_AVOID[task.id] = task.last_update
+            constants.TO_AVOID[task.last_update] = task.id
         return batch_list
 
 Pool()

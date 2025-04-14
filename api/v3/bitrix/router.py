@@ -46,9 +46,9 @@ async def on_task_update(request: Request):
     if bxtask is None or not bxtask.is_valid():
         uvicorn_logger.info(f'-- Task id={task_id} is not valid. --')
         return
-    task_last_update = constants.TO_AVOID.get(task_id, 0)
-    if bxtask.last_update == task_last_update:
-        constants.TO_AVOID.pop(bxtask.id, None)
+    task_id_from_avoid = constants.TO_AVOID.get(bxtask.last_update, None)
+    if task_id_from_avoid == bxtask.id:
+        constants.TO_AVOID.pop(bxtask.last_update, None)
         uvicorn_logger.info(f'-- The update event for the task (id={bxtask.id}) was avoided. --')
         return
     pool = Pool()

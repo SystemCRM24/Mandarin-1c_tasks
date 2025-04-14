@@ -106,8 +106,7 @@ class BXTask:
         task.status = response.get('status', None)
         task.group_id = response.get('groupId', None)
         task.allow_time_tracking = response.get('allowTimeTracking', None)
-        last_update: str = response.get('ufAuto261370983936', None) or ''
-        task.last_update = int(last_update) if last_update.isdigit() else None
+        task.last_update = response.get('ufAuto261370983936', None)
         task.assigner_id = response.get('createdBy', None)
         task.responsible_id = response.get('responsibleId', None)
         task.title = response.get('title', None)
@@ -130,7 +129,7 @@ class BXTask:
 
     def _is_valid(self):
         yield bool(self.onec_id)
-        yield isinstance(self.last_update, int)
+        yield bool(self.last_update)
         yield self.group_id == constants.ONEC_GROUP_ID
         yield self.allow_time_tracking == 'Y'
         yield isinstance(self.deadline, datetime)
@@ -174,4 +173,4 @@ class BXTask:
     def mark_timestamp(self):
         """Обновляет атрибут last_update штампом времени, соответствующий сейчас по серверному времени"""
         timestamp = datetime.now(SERVER_TZ).timestamp()
-        self.last_update = int(timestamp)
+        self.last_update = str(timestamp)
