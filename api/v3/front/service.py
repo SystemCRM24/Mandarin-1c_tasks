@@ -48,18 +48,18 @@ def fetch_tasks() -> tuple[datetime, datetime, list[front.TaskSchema]]:
             first_start = task.start_date_plan
         if last_end is None or last_end < task.end_date_plan:
             last_end = task.end_date_plan
-            task_schema = front.TaskSchema(
-                id=task.id,
-                label=task.title,
-                resourceId=task.responsible_id,
-                deadline=task.deadline,
-                description=task.description,
-                time=front.IntervalSchema(
-                    start=task.start_date_plan,
-                    end=task.end_date_plan
-                )
+        task_schema = front.TaskSchema(
+            id=task.id,
+            label=task.title,
+            resourceId=task.responsible_id,
+            deadline=task.deadline,
+            description=task.description,
+            time=front.IntervalSchema(
+                start=task.start_date_plan,
+                end=task.end_date_plan
             )
-            tasks.append(task_schema)
+        )
+        tasks.append(task_schema)
     return first_start, last_end, tasks
 
 
