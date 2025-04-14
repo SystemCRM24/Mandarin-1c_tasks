@@ -29,6 +29,7 @@ class OrderHandler:
     async def _attach_files(self, tasks_handler_at: asyncio.Task, file_handler_at: asyncio.Task):
         """присоединяет файлы к задачам."""
         result = await asyncio.gather(tasks_handler_at, file_handler_at)
+        uvicorn_logger.info(str(result))
         tasks_items: list[TaskItemSchema] = result[0]
         files_ids: list[int] = result[1]
         if not files_ids:
