@@ -34,7 +34,7 @@ class BXTask:
         'status': 'STATUS',
         'group_id': 'GROUP_ID',
         'allow_time_tracking': 'ALLOW_TIME_TRACKING',
-        'last_update': 'UF_AUTO_261370983936',
+        'last_update': 'UF_AUTO_931411169394',
         'assigner_id': 'CREATED_BY',
         'responsible_id': 'RESPONSIBLE_ID',
         'title': 'TITLE',
@@ -106,7 +106,7 @@ class BXTask:
         task.status = response.get('status', None)
         task.group_id = response.get('groupId', None)
         task.allow_time_tracking = response.get('allowTimeTracking', None)
-        task.last_update = response.get('ufAuto261370983936', None)
+        task.last_update = response.get('ufAuto931411169394', None)
         task.assigner_id = response.get('createdBy', None)
         task.responsible_id = response.get('responsibleId', None)
         task.title = response.get('title', None)
