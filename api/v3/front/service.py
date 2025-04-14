@@ -29,10 +29,11 @@ def fetch_resources() -> list[front.ResourceSchema]:
     pool = Pool()
     resources: list[front.ResourceSchema] = []
     for user in pool._responsibles.values():
-        label = user['NAME']
+        department = user['DEPARTMENT']
+        label = f'{department['NAME']}: {user['NAME']}'
         if user['LAST_NAME']:
             label += f' {user['LAST_NAME']}'
-        resource = front.ResourceSchema(id=user['ID'], label=label, department=user['DEPARTMENT']['ID'])
+        resource = front.ResourceSchema(id=user['ID'], label=label, department=department['ID'])
         resources.append(resource)
     resources.sort(key=lambda r: r.department)
     return resources
