@@ -11,7 +11,8 @@ POOL = Pool()
 
 async def fetch_websocket_message() -> front.DataSchema:
     now = datetime.now(constants.MOSCOW_TZ)
-    start, end, tasks = fetch_tasks()
+    pool_tasks = await POOL.get_tasks()
+    start, end, tasks = fetch_tasks(pool_tasks)
     if start is None:
         start = now
     if end is None:
@@ -41,10 +42,9 @@ def fetch_resources() -> list[front.ResourceSchema]:
     return resources
 
 
-async def fetch_tasks() -> tuple[datetime, datetime, list[front.TaskSchema]]:
+def fetch_tasks(pool_tasks) -> tuple[datetime, datetime, list[front.TaskSchema]]:
     tasks = []
     first_start = last_end = None
-    pool_tasks = await POOL.get_tasks()
     for task in pool_tasks.values():
         if first_start is None or first_start > task.start_date_plan:
             first_start = task.start_date_plan
