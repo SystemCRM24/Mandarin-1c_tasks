@@ -25,6 +25,11 @@ class Pool:
             self._schedule: Schedule = None
             asyncio.create_task(self.fill())
 
+    async def get_tasks(self) -> dict[str, BXTask]:
+        """Выдает задачи из под замка."""
+        async with self.__lock:
+            return self._tasks
+
     async def fill(self):
         """Заполняет бассейн актуальными задачами"""
         async with self.__lock:

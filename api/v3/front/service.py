@@ -6,6 +6,9 @@ from api.v3.schemas import front
 from api.v3 import constants
 
 
+POOL = Pool()
+
+
 async def fetch_websocket_message() -> front.DataSchema:
     now = datetime.now(constants.MOSCOW_TZ)
     start, end, tasks = fetch_tasks()
@@ -26,9 +29,8 @@ async def fetch_websocket_message() -> front.DataSchema:
 
 
 def fetch_resources() -> list[front.ResourceSchema]:
-    pool = Pool()
     resources: list[front.ResourceSchema] = []
-    for user in pool._responsibles.values():
+    for user in POOL._responsibles.values():
         department = user['DEPARTMENT']
         label = f'{department['NAME']}: {user['NAME']}'
         if user['LAST_NAME']:
@@ -39,11 +41,11 @@ def fetch_resources() -> list[front.ResourceSchema]:
     return resources
 
 
-def fetch_tasks() -> tuple[datetime, datetime, list[front.TaskSchema]]:
-    pool = Pool()
+async def fetch_tasks() -> tuple[datetime, datetime, list[front.TaskSchema]]:
     tasks = []
     first_start = last_end = None
-    for task in pool._tasks.values():
+    pool_tasks = await POOL.get_tasks()
+    for task in pool_tasks.values():
         if first_start is None or first_start > task.start_date_plan:
             first_start = task.start_date_plan
         if last_end is None or last_end < task.end_date_plan:
