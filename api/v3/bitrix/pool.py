@@ -77,13 +77,10 @@ class Pool:
     
     async def update(self, bxtask: BXTask):
         """Обновляет задачу в бассейне"""
-        if bxtask.id in self._tasks:
-            async with self.__lock:
-                self._tasks[bxtask.id] = bxtask
-            uvicorn_logger.info(f'-- Task (id={bxtask.id}) was update. --')
-            asyncio.create_task(self.recalculate())
-        else:
-            uvicorn_logger.info(f'-- Task (id={bxtask.id}) not in pool. --')
+        async with self.__lock:
+            self._tasks[bxtask.id] = bxtask
+        uvicorn_logger.info(f'-- Task (id={bxtask.id}) was update. --')
+        asyncio.create_task(self.recalculate())
 
     async def delete(self, task_id: str):
         """Удаляет задачу из бассейна"""
