@@ -4,7 +4,7 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from api.utils import log_exception
 from .service import fetch_websocket_message
 from api.v3 import constants
-# from api.v3.schemas.front import SyncSchema
+from api.v3.schemas.front import SyncSchema
 
 
 router = APIRouter(prefix='/front')
@@ -40,26 +40,36 @@ async def fetch_data():
     return await fetch_websocket_message()
 
 
-# async def start_sync_observer():
-#     """Наблюдающий за началом синхронизации задач"""
-#     while True:
-#         await constants.START_SYNC.wait()
-#         constants.START_SYNC.clear()
-#         message = SyncSchema(content=True)
-#         await send_message(message.model_dump_json())
-
-# asyncio.create_task(start_sync_observer())
+@router.get('/start_sync_event', status_code=200)
+async def start_sync_event():
+    constants.START_SYNC.set()
 
 
-# async def end_sync_observer():
-#     """Наблюдающий за окончанием синхронизации задач"""
-#     while True:
-#         await constants.END_SYNC.wait()
-#         constants.END_SYNC.clear()
-#         message = SyncSchema(content=False)
-#         await send_message(message.model_dump_json())
+@router.get('/end_sync_event', status_code=200)
+async def start_sync_event():
+    constants.END_SYNC.set()
 
-# asyncio.create_task(end_sync_observer())
+
+async def start_sync_observer():
+    """Наблюдающий за началом синхронизации задач"""
+    while True:
+        await constants.START_SYNC.wait()
+        constants.START_SYNC.clear()
+        message = SyncSchema(content=True)
+        await send_message(message.model_dump_json())
+
+asyncio.create_task(start_sync_observer())
+
+
+async def end_sync_observer():
+    """Наблюдающий за окончанием синхронизации задач"""
+    while True:
+        await constants.END_SYNC.wait()
+        constants.END_SYNC.clear()
+        message = SyncSchema(content=False)
+        await send_message(message.model_dump_json())
+
+asyncio.create_task(end_sync_observer())
 
 
 async def data_event_observer():
