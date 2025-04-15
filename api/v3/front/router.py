@@ -61,13 +61,27 @@ async def start_sync_observer():
 asyncio.create_task(start_sync_observer())
 
 
+async def send_end_sync_message():
+    """Посылает сообщение об окончании синхронизации"""
+    try:
+        await asyncio.sleep(2)
+        message = SyncSchema(content=False)
+        await send_message(message.model_dump_json())
+    except asyncio.CancelledError:
+        pass
+
+
+_END_SYNC_ATASK = asyncio.create_task(send_end_sync_message())
+
+
 async def end_sync_observer():
     """Наблюдающий за окончанием синхронизации задач"""
+    global _END_SYNC_ATASK
     while True:
         await constants.END_SYNC.wait()
         constants.END_SYNC.clear()
-        message = SyncSchema(content=False)
-        await send_message(message.model_dump_json())
+        _END_SYNC_ATASK.cancel()
+        _END_SYNC_ATASK = asyncio.create_task(send_end_sync_message())
 
 asyncio.create_task(end_sync_observer())
 
