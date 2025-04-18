@@ -50,7 +50,8 @@ class TaskHandler:
         bx_task.onec_id = get_onec_id(self.order, self.calculation)
         bx_task.group_id = constants.ONEC_GROUP_ID
         bx_task.allow_time_tracking = 'Y'
-        bx_task.assigner_id = await self.select_assigner()
+        bx_task.assigner_id = constants.DIRECTOR_ID
+        bx_task.accomplices = await self.select_accomplices()
         responsible, start_time = await self.select_responsible()
         bx_task.responsible_id = responsible
         bx_task.title = f"{self.calculation.position}: {self.order.name}"
@@ -66,7 +67,7 @@ class TaskHandler:
     async def update(self) -> str | None:
         if self.order.completed:
             self.bx_task.status = '5'   # выполнен
-        self.bx_task.assigner_id = await self.select_assigner()
+        self.bx_task.accomplices = await self.select_accomplices()
         self.bx_task.description = self.get_description()
         self.bx_task.deadline = self.order.deadline
         self.bx_task.time_estimate = self.calculation.time
@@ -74,13 +75,15 @@ class TaskHandler:
         self.bx_task.end_date_plan = edp
         self._update_response_message('Задача обновлена.')
 
-    async def select_assigner(self) -> str:
-        """Определяет Постановщика"""
+    async def select_accomplices(self) -> list:
+        """Определяет Соисполнителей задачи - менеджеров"""
         manager_id = await requests.get_manager(self.order.manager)
+        result = []
         if manager_id is None:
-            manager_id = constants.DIRECTOR_ID
-            self._update_response_message(f'Постановщик заменен на пользователя ID={manager_id}, так как не был найден пользователь с именем ({self.order.manager})')
-        return manager_id
+            self._update_response_message(f'Не найден менеджер {self.order.manager} для задачи')
+        else:
+            result.append(manager_id)
+        return result
 
     async def select_responsible(self) -> tuple[str, datetime]:
         """Получает исполнителя задачи и крайнее время"""

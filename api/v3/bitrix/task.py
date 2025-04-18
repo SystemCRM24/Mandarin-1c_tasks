@@ -18,6 +18,7 @@ class BXTask:
         'last_update',
         'assigner_id',
         'responsible_id',
+        'accomplices',
         'title',
         'description',
         'created_date',
@@ -37,6 +38,7 @@ class BXTask:
         'last_update': 'UF_AUTO_931411169394',
         'assigner_id': 'CREATED_BY',
         'responsible_id': 'RESPONSIBLE_ID',
+        'accomplices': 'ACCOMPLICES',
         'title': 'TITLE',
         'description': 'DESCRIPTION',
         'created_date': 'CREATED_DATE',
@@ -60,6 +62,7 @@ class BXTask:
         # Персонал задачи
         self.assigner_id = None
         self.responsible_id = None
+        self.accomplices = None
         # Текстовая информация задачи
         self.title = None
         self.description = None
@@ -109,6 +112,7 @@ class BXTask:
         task.last_update = response.get('ufAuto931411169394', None)
         task.assigner_id = response.get('createdBy', None)
         task.responsible_id = response.get('responsibleId', None)
+        task.accomplices = response.get('accomplices', None)
         task.title = response.get('title', None)
         task.description = response.get('description', None)
         created_date = response.get('created_date', None)
