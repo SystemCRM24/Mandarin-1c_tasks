@@ -11,9 +11,9 @@ from .task import BXTask
 router = APIRouter(prefix='/bitrix')
 
 
-async def get_task_id_from_form(request: Request) -> str | None:
+async def get_task_id_from_form(request: Request, field: str = 'FIELDS_AFTER') -> str | None:
     async with request.form() as form:
-        return form.get('data[FIELDS_AFTER][ID]', None)
+        return form.get(f'data[{field}][ID]', None)
 
 
 async def get_bxtask_from_form(request: Request) -> tuple[str, BXTask | None]:
@@ -62,11 +62,7 @@ async def on_task_update(request: Request):
 @router.post('/on_task_delete', status_code=200)
 async def on_task_delete(request: Request):
     """Ловим эвенты на удаление задач"""
-    async with request.form() as form:
-        uvicorn_logger.info(str(form))
-    task_id = await get_task_id_from_form(request)
-    async with request.form() as form:
-        uvicorn_logger.info(str(form))
+    task_id = await get_task_id_from_form(request, 'FIELDS_BEFORE')
     if task_id is None:
         return
     pool = Pool()
