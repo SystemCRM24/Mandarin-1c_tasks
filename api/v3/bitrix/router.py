@@ -62,6 +62,8 @@ async def on_task_update(request: Request):
 @router.post('/on_task_delete', status_code=200)
 async def on_task_delete(request: Request):
     """Ловим эвенты на удаление задач"""
+    async with request.form() as form:
+        uvicorn_logger.info(str(form))
     task_id = await get_task_id_from_form(request)
     async with request.form() as form:
         uvicorn_logger.info(str(form))
