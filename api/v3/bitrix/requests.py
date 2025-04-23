@@ -14,8 +14,12 @@ BX = BitrixAsync(constants.BITRIX_WEBHOOK, verbose=False)
 
 async def call_batch(requests: Iterable) -> dict:
     """Посылает батч-запрос"""
-    cmd = {i: r for i, r in enumerate(requests)}
-    return await BX.call_batch(params={'halt': 0, 'cmd': cmd})
+    try:
+        cmd = {i: r for i, r in enumerate(requests)}
+        return await BX.call_batch(params={'halt': 0, 'cmd': cmd})
+    except Exception as exc:
+        print(requests)
+        raise exc
 
 
 TAKS_SELECT_PARAMS = tuple(BXTask.PARAM_BY_ATTR.values())

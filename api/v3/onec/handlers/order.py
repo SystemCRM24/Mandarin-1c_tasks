@@ -43,7 +43,9 @@ class OrderHandler:
         # Пошло на обновление
         for task_dct in response:
             onec_id = task_dct.get('ufAuto151992241453', '')
-            calculation = calc_by_onec.pop(onec_id)
+            calculation = calc_by_onec.pop(onec_id, None)
+            if calculation is None:
+                continue
             handler = TaskHandler.from_bx_task(self.order, calculation, task_dct)
             self._task_handlers.append(handler)
         # Пошло на создание
