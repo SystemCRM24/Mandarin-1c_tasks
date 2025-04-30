@@ -31,6 +31,7 @@ class _DataSchema(BaseModel):
     resources: list[ResourceSchema]
     tasks: list[TaskSchema]
 
+
 class DataSchema(BaseModel):
     meta: str = 'data'
     content: _DataSchema

@@ -10,6 +10,7 @@ POOL = Pool()
 
 
 async def fetch_websocket_message() -> front.DataSchema:
+    """Формирует общее сообщение для форнта"""
     now = datetime.now(constants.MOSCOW_TZ)
     pool_tasks = await POOL.get_tasks()
     start, end, tasks = fetch_tasks(pool_tasks)
@@ -30,6 +31,7 @@ async def fetch_websocket_message() -> front.DataSchema:
 
 
 def fetch_resources() -> list[front.ResourceSchema]:
+    """Получает ресурсы: людей, на которых ставяться задачи."""
     resources: list[front.ResourceSchema] = []
     for user in POOL._responsibles.values():
         department = user['DEPARTMENT']
@@ -43,6 +45,7 @@ def fetch_resources() -> list[front.ResourceSchema]:
 
 
 def fetch_tasks(pool_tasks) -> tuple[datetime, datetime, list[front.TaskSchema]]:
+    """Получает задачи"""
     tasks = []
     first_start = last_end = None
     for task in pool_tasks.values():

@@ -1,5 +1,4 @@
 from fastapi import APIRouter
-from fastapi.exceptions import HTTPException
 import asyncio
 
 from api.utils import log_exception
@@ -12,12 +11,12 @@ router = APIRouter(prefix="/onec")
 
 
 @router.post("", status_code=200)
-async def process_order(order: OrderSchema):
+async def process_order(order: OrderSchema) -> str:
     handler = OrderHandler(order)
     try: 
         response = await handler.process()
         asyncio.create_task(log_onec_request(order, response))
-        return response
+        return f"Задачи по заказу: {order.name} поставлены успешно"
     except Exception as exc:
         asyncio.create_task(log_exception(exc, 'onec'))
-        raise HTTPException(500, exc)
+        return f"При постановке задач по заказу: {order.name} возникла ошибка."
