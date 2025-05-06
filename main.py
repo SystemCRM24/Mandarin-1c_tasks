@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -20,8 +20,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.mount("/guntt", StaticFiles(directory='front/public', html=True), name='guntt')
-
 app.include_router(front_router)
 app.include_router(v3_router)
 app.include_router(utils_router)
+
+
+# Для возможности получения файлов
+class CustomStaticFiles(StaticFiles):
+    async def __call__(self, scope, receive, send):
+        if scope['method'] == 'POST':
+            scope['method'] = 'GET'
+        return await super().__call__(scope, receive, send)
+
+
+app.mount("/guntt", CustomStaticFiles(directory='front/public', html=True), name='guntt')
