@@ -4,13 +4,15 @@ services:
     build:
       context: .
     ports:
-      - 8000:8000
-    command: "uvicorn main:app 
-              --host 0.0.0.0 
-              --port 8000
-              
-              "
+      - 444:8000
+    command: >
+      uvicorn main:app 
+      --host 0.0.0.0 
+      --port 8000 
+    # --ssl-keyfile=./cert/key.txt 
+    # --ssl-certfile=./cert/certificate.txt
     env_file:
       - .env
     volumes:
       - ./logs:/app/logs
+      # - c:\wamp64\bin\apache\apache2.4.59\conf\ssl\:/app/cert
