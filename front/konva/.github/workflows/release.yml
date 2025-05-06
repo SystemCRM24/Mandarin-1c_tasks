@@ -1,0 +1,95 @@
+name: Konva Timeline - Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+
+      - name: Install NodeJS
+        uses: actions/setup-node@v3
+        with:
+          node-version: lts/iron
+
+      - name: Cache Dependencies
+        id: cache-dependencies
+        uses: actions/cache@v3
+        env:
+          cache-name: konva-timeline-dependencies
+        with:
+          path: node_modules
+          key: konva-timeline-dependencies-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Install Dependencies
+        if: steps.cache-dependencies.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - name: Git Config
+        run: |
+          git config --local user.email "${{ secrets.GIT_USER_EMAIL }}"
+          git config --local user.name "${{ secrets.GIT_USER_NAME }}"
+          git pull
+
+      - name: Run ESLint and Prettier
+        id: code-format
+        run: |
+          npm run clean:code
+          git add .
+          echo "formatted-files=$(git status -s -uno | wc -l)" >> $GITHUB_OUTPUT
+
+      - name: Commit Changes
+        if: steps.code-format.outputs.formatted-files > 0
+        run: |
+          git commit -m "refactor: 💡 Clean code" -a
+
+      - name: Unit tests
+        run: |
+          npm run test:ci
+
+      - name: Generate Docs
+        id: generate-docs
+        run: |
+          npm run build:storybook
+          git add .
+          echo "generated-docs=$(git status -s -uno | wc -l)" >> $GITHUB_OUTPUT
+
+      - name: Commit Changes
+        if: steps.generate-docs.outputs.generated-docs > 0
+        run: |
+          git commit -m "docs: ✏️ Updated StoryBook" -a
+
+      - name: Test runner
+        run: |
+          npx playwright install --with-deps
+          npx concurrently -k -s first -n "SB,TEST" -c "magenta,blue" \
+            "npx http-server docs --port 6006 --silent" \
+            "npx wait-on tcp:127.0.0.1:6006 && npm run test:sb"
+
+      - name: Build
+        run: npm run build
+
+      - name: Release
+        env:
+          GIT_AUTHOR_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
+          GIT_AUTHOR_NAME: ${{ secrets.GIT_USER_NAME }}
+          GIT_COMMITTER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
+          GIT_COMMITTER_NAME: ${{ secrets.GIT_USER_NAME }}
+          GITHUB_TOKEN: ${{ secrets.PA_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npx semantic-release
+
+      - name: Send Notification
+        uses: Co-qn/google-chat-notification@master
+        with:
+          name: Konva Timeline - Release
+          url: ${{ secrets.GOOGLE_CHAT }}
+          status: ${{ job.status }}
+        if: always()

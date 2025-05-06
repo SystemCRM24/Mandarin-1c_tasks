@@ -15,4 +15,5 @@ services:
       - .env
     volumes:
       - ./logs:/app/logs
+      - ./front:/app/front
       # - c:\wamp64\bin\apache\apache2.4.59\conf\ssl\:/app/cert

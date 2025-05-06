@@ -1,0 +1,22 @@
+#headerTop {
+    display: flex;
+    margin: 0.5rem;
+    justify-content: space-between;
+}
+
+#headerSelects {
+    display: flex;
+} 
+#headerSelects > * {
+    margin-right: 5px;
+}
+
+#nowBtn {
+    display: flex;
+    align-content: flex-end;
+    flex-wrap: wrap;
+}
+
+#header select {
+    width: 150px;
+}

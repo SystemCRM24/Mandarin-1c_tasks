@@ -8,7 +8,7 @@ sys.path.append(str(parent))
 
 
 from api.v3.bitrix.pool import Pool
-from api.v3.front.service import fetch_websocket_message
+from api.v3.front.funcs import fetch_websocket_message
 
 
 async def main():

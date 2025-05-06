@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.DEFAULT_STROKE_WIDTH = exports.DEFAULT_TEXT_SIZE = exports.DEFAULT_GRID_COLUMN_WIDTH = exports.MINIMUM_GRID_ROW_HEIGHT = exports.DEFAULT_GRID_ROW_HEIGHT = exports.BASE_DIMENSION = void 0;
+exports.BASE_DIMENSION = 8;
+// export const DEFAULT_GRID_ROW_HEIGHT = BASE_DIMENSION * 6;
+exports.DEFAULT_GRID_ROW_HEIGHT = 50;
+exports.MINIMUM_GRID_ROW_HEIGHT = exports.DEFAULT_GRID_ROW_HEIGHT / 2;
+// export const DEFAULT_GRID_COLUMN_WIDTH = BASE_DIMENSION * 8;
+exports.DEFAULT_GRID_COLUMN_WIDTH = 60 * 2;
+exports.DEFAULT_TEXT_SIZE = exports.BASE_DIMENSION * 1.5;
+exports.DEFAULT_STROKE_WIDTH = 1;

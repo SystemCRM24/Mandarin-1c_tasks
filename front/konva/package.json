@@ -1,0 +1,112 @@
+{
+  "name": "@melfore/konva-timeline",
+  "version": "1.39.2",
+  "description": "Melfore ReactJS Timeline library made with Konva",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "npm run pre:build && tsc",
+    "build:test": "npm run pre:test && tsc",
+    "build:storybook": "storybook build -o docs --docs --quiet",
+    "clean:code": "eslint ./ --ext .js,.jsx,.ts,.tsx --fix && prettier ./ --write",
+    "clean:install": "rimraf dist && rimraf coverage && rimraf node_modules && npm i",
+    "pre:commit": "npm run clean:code",
+    "pre:push": "npm run test:ci && npm run build:test",
+    "pre:test": "copyfiles -a -f ./.typescript/test/tsconfig.json ./",
+    "pre:build": "copyfiles -a -f ./.typescript/build/tsconfig.json ./",
+    "start": "npm run pre:test && storybook dev -p 6006",
+    "test": "npm run pre:test && jest --watch",
+    "test:ci": "npm run pre:test && jest --ci",
+    "test:sb": "test-storybook --coverage --coverageDirectory coverage/storybook --ci --verbose",
+    "test:sb:coverage": "npx nyc report --reporter=lcov -t coverage/storybook --report-dir coverage/storybook",
+    "semantic-release": "semantic-release",
+    "update:packages": "npx npm-check-updates --interactive --upgrade --doctor --doctorTest \"npm run pre:push\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/melfore/konva-timeline.git"
+  },
+  "author": "@melfore",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/melfore/konva-timeline/issues"
+  },
+  "homepage": "https://github.com/melfore/konva-timeline#readme",
+  "peerDependencies": {
+    "konva": ">= 9.2.0 < 10",
+    "luxon": ">= 3.3.0 < 4",
+    "react": ">= 18.2.0 < 19",
+    "react-dom": ">= 18.2.0 < 19",
+    "react-konva": ">= 18.2.9 < 19",
+    "react-konva-utils": ">= 1.0.5 < 2"
+  },
+  "devDependencies": {
+    "@babel/plugin-transform-private-property-in-object": "^7.25.9",
+    "@babel/preset-env": "^7.26.0",
+    "@babel/preset-react": "^7.26.3",
+    "@babel/preset-typescript": "^7.26.0",
+    "@commitlint/cli": "^19.6.1",
+    "@commitlint/config-conventional": "^19.6.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/commit-analyzer": "^13.0.1",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^11.0.1",
+    "@semantic-release/npm": "^12.0.1",
+    "@semantic-release/release-notes-generator": "^14.0.3",
+    "@storybook/addon-coverage": "^1.0.5",
+    "@storybook/addon-essentials": "^8.4.7",
+    "@storybook/addon-interactions": "^8.4.7",
+    "@storybook/addon-links": "^8.4.7",
+    "@storybook/addon-mdx-gfm": "^8.4.7",
+    "@storybook/addon-webpack5-compiler-babel": "^3.0.5",
+    "@storybook/blocks": "^8.4.7",
+    "@storybook/react": "^8.4.7",
+    "@storybook/react-webpack5": "^8.4.7",
+    "@storybook/test": "^8.4.7",
+    "@storybook/test-runner": "^0.21.0",
+    "@types/jest": "^29.5.14",
+    "@types/luxon": "^3.4.2",
+    "@types/node": "^20.14.5",
+    "@types/react": "^18.3.10",
+    "@types/react-dom": "^18.3.0",
+    "@typescript-eslint/eslint-plugin": "^7.16.0",
+    "@typescript-eslint/parser": "^7.16.0",
+    "copyfiles": "^2.4.1",
+    "cz-conventional-changelog": "^3.3.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-react": "^7.37.3",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
+    "eslint-plugin-storybook": "^0.9.0",
+    "konva": "^9.3.18",
+    "luxon": "^3.5.0",
+    "prettier": "^3.4.2",
+    "prop-types": "^15.8.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-konva": "^18.2.10",
+    "react-konva-utils": "^1.0.7",
+    "rimraf": "^6.0.1",
+    "semantic-release": "^24.2.1",
+    "storybook": "^8.4.7",
+    "typescript": "^5.7.3"
+  },
+  "browserslist": {
+    "production": [
+      ">= 0.5%",
+      "last 2 versions",
+      "not dead"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 edge version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

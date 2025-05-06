@@ -1,6 +1,7 @@
 from dotenv import dotenv_values
 from zoneinfo import ZoneInfo
 from asyncio import Event, Queue
+from fastapi import WebSocket
 
 
 _values = dotenv_values()
@@ -17,8 +18,9 @@ DEPARTMENT_ID = _values.get('DEPARTMENT_ID')
 
 # Остальное
 MOSCOW_TZ = ZoneInfo('Europe/Moscow')
-QUEUE = Queue()         # Очередь для работы с событиями из битрикса.
-START_SYNC = Event()    # Сигнал о начале синхронизации бассейна
-END_SYNC = Event()      # Сигнал об окончании синхронизации бассейна
-DATA_EVENT = Event()    # Сигнал на отправку данных на фронт
+CONNECTIONS: set[WebSocket] = set()     # Подключения к front
+QUEUE = Queue()                         # Очередь для работы с событиями из битрикса.
+START_SYNC = Event()                    # Сигнал о начале синхронизации бассейна
+END_SYNC = Event()                      # Сигнал об окончании синхронизации бассейна
+DATA_EVENT = Event()                    # Сигнал на отправку данных на фронт
 TO_AVOID: dict[str, int] = {}
