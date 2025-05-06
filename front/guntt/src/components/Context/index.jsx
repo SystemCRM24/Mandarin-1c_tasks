@@ -82,7 +82,7 @@ export const AppProvider = ({ children }) => {
     const [wsMessage, setWSMessage] = useState(null);
     useEffect(
         () => {
-            const socket = new WebSocket("wss://office.ra-mandarin.com:444/v3/front/ws");
+            const socket = new WebSocket("wss://office.ra-mandarin.com:444/front/ws");
             socket.onopen = () => console.log('WebSocket connected');
             socket.onmessage = (event) => {
                 console.log('Message received');
